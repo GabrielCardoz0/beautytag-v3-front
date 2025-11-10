@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        calendar: {
+          "hour-line": "hsl(var(--calendar-hour-line))",
+          "current-time": "hsl(var(--calendar-current-time))",
+        },
+        appointment: {
+          bg: "hsl(var(--appointment-bg))",
+          border: "hsl(var(--appointment-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
