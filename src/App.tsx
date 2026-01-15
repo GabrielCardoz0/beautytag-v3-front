@@ -11,6 +11,7 @@ import Calendar from "./pages/Calendar";
 import Partners from "./pages/Partners";
 import PartnerDetails from "./pages/PartnerDetails";
 import Services from "./pages/Services";
+import Forms from "./pages/Forms";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,7 @@ const AppRoutes = () => {
       <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
       <Route path="/partners/:id" element={<ProtectedRoute><Layout><PartnerDetails /></Layout></ProtectedRoute>} />
       <Route path="/services" element={<ProtectedRoute><Layout><Services /></Layout></ProtectedRoute>} />
+      <Route path="/forms" element={<ProtectedRoute><Layout><Forms /></Layout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

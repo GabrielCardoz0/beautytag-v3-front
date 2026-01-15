@@ -5,14 +5,19 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ServiceModal } from '@/components/ServiceModal';
+import { ServiceDetailsModal } from '@/components/ServiceDetailsModal';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Service, Partner } from '@/types';
+import { toast } from 'sonner';
 
 export default function Services() {
   const [services, setServices] = useLocalStorage<Service[]>('platai-services', []);
   const [partners] = useLocalStorage<Partner[]>('platai-partners', []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
   const handleSaveService = (serviceData: Omit<Service, 'id' | 'createdAt'>) => {
     const newService: Service = {
@@ -23,9 +28,38 @@ export default function Services() {
     setServices(prev => [...prev, newService]);
   };
 
+  const handleUpdateService = (id: string, serviceData: Omit<Service, 'id' | 'createdAt'>) => {
+    setServices(prev => prev.map(s => 
+      s.id === id ? { ...s, ...serviceData } : s
+    ));
+    setEditingService(null);
+  };
+
+  const handleDeleteService = (id: string) => {
+    setServices(prev => prev.filter(s => s.id !== id));
+    setIsDetailsOpen(false);
+    setSelectedService(null);
+    toast.success('Serviço excluído com sucesso!');
+  };
+
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service);
+    setIsDetailsOpen(true);
+  };
+
+  const handleEditFromDetails = () => {
+    setIsDetailsOpen(false);
+    setEditingService(selectedService);
+    setIsModalOpen(true);
+  };
+
   const getPartnerName = (partnerId: string) => {
     const partner = partners.find(p => p.id === partnerId);
     return partner?.name || 'Parceiro não encontrado';
+  };
+
+  const getPartnerById = (partnerId: string) => {
+    return partners.find(p => p.id === partnerId) || null;
   };
 
   const filteredServices = services.filter(service =>
@@ -46,7 +80,7 @@ export default function Services() {
     <div className="p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold text-foreground">Serviços</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => { setEditingService(null); setIsModalOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Serviço
         </Button>
@@ -71,7 +105,7 @@ export default function Services() {
               {searchTerm ? 'Tente ajustar sua busca' : 'Comece cadastrando seu primeiro serviço'}
             </p>
             {!searchTerm && (
-              <Button onClick={() => setIsModalOpen(true)}>
+              <Button onClick={() => { setEditingService(null); setIsModalOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Cadastrar Serviço
               </Button>
@@ -81,7 +115,11 @@ export default function Services() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredServices.map(service => (
-            <Card key={service.id} className="hover:border-primary/50 transition-colors">
+            <Card 
+              key={service.id} 
+              className="hover:border-primary/50 transition-colors cursor-pointer"
+              onClick={() => handleServiceClick(service)}
+            >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -123,7 +161,18 @@ export default function Services() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onSave={handleSaveService}
+        onUpdate={handleUpdateService}
         partners={partners}
+        editingService={editingService}
+      />
+
+      <ServiceDetailsModal
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        service={selectedService}
+        partner={selectedService ? getPartnerById(selectedService.partnerId) : null}
+        onEdit={handleEditFromDetails}
+        onDelete={() => selectedService && handleDeleteService(selectedService.id)}
       />
     </div>
   );
