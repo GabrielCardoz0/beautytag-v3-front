@@ -30,3 +30,16 @@ export interface User {
   name: string;
   email: string;
 }
+
+export interface FormServiceOption {
+  serviceId: string;
+  secondaryServiceIds: string[];
+}
+
+export interface Form {
+  id: string;
+  name: string;
+  description: string;
+  serviceOptions: FormServiceOption[];
+  createdAt: string;
+}

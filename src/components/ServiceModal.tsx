@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,10 +12,12 @@ interface ServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (service: Omit<Service, 'id' | 'createdAt'>) => void;
+  onUpdate?: (id: string, service: Omit<Service, 'id' | 'createdAt'>) => void;
   partners: Partner[];
+  editingService?: Service | null;
 }
 
-export function ServiceModal({ open, onOpenChange, onSave, partners }: ServiceModalProps) {
+export function ServiceModal({ open, onOpenChange, onSave, onUpdate, partners, editingService }: ServiceModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -25,6 +27,34 @@ export function ServiceModal({ open, onOpenChange, onSave, partners }: ServiceMo
     gender: '' as 'masculino' | 'feminino' | 'unissex' | '',
     partnerId: '',
   });
+
+  useEffect(() => {
+    if (editingService) {
+      setFormData({
+        name: editingService.name,
+        description: editingService.description,
+        price: editingService.price.toString(),
+        repassePercent: editingService.repassePercent.toString(),
+        colaboradorPercent: editingService.colaboradorPercent.toString(),
+        gender: editingService.gender,
+        partnerId: editingService.partnerId,
+      });
+    } else {
+      resetForm();
+    }
+  }, [editingService, open]);
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      repassePercent: '',
+      colaboradorPercent: '',
+      gender: '',
+      partnerId: '',
+    });
+  };
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,7 +84,7 @@ export function ServiceModal({ open, onOpenChange, onSave, partners }: ServiceMo
       return;
     }
 
-    onSave({
+    const serviceData = {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
@@ -62,26 +92,25 @@ export function ServiceModal({ open, onOpenChange, onSave, partners }: ServiceMo
       colaboradorPercent: parseFloat(formData.colaboradorPercent) || 0,
       gender: formData.gender as 'masculino' | 'feminino' | 'unissex',
       partnerId: formData.partnerId,
-    });
+    };
 
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      repassePercent: '',
-      colaboradorPercent: '',
-      gender: '',
-      partnerId: '',
-    });
+    if (editingService && onUpdate) {
+      onUpdate(editingService.id, serviceData);
+      toast.success('Serviço atualizado com sucesso!');
+    } else {
+      onSave(serviceData);
+      toast.success('Serviço cadastrado com sucesso!');
+    }
+
+    resetForm();
     onOpenChange(false);
-    toast.success('Serviço cadastrado com sucesso!');
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cadastrar Novo Serviço</DialogTitle>
+          <DialogTitle>{editingService ? 'Editar Serviço' : 'Cadastrar Novo Serviço'}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -213,7 +242,7 @@ export function ServiceModal({ open, onOpenChange, onSave, partners }: ServiceMo
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit">Cadastrar Serviço</Button>
+            <Button type="submit">{editingService ? 'Salvar Alterações' : 'Cadastrar Serviço'}</Button>
           </div>
         </form>
       </DialogContent>
