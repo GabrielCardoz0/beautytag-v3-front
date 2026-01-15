@@ -1,5 +1,7 @@
-import { Calendar, LayoutDashboard, Users, Scissors, Settings } from "lucide-react";
+import { Calendar, Users, Scissors, Settings, Building2, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -12,22 +14,24 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Calendário", url: "/calendar", icon: Calendar },
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Clientes", url: "/clients", icon: Users },
+  { title: "Parceiros", url: "/partners", icon: Building2 },
   { title: "Serviços", url: "/services", icon: Scissors },
   { title: "Configurações", url: "/settings", icon: Settings },
 ];
 
-// Mock user data - replace with actual user data
-const user = {
-  name: "João Silva",
-  email: "joao@example.com",
-};
-
 export function AppSidebar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-6">
@@ -63,20 +67,28 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer">
+        <div className="flex items-center gap-3 px-2 py-2">
           <Avatar className="h-9 w-9 bg-primary">
             <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-              {user.name.charAt(0).toUpperCase()}
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col flex-1 overflow-hidden">
             <span className="text-sm font-medium text-sidebar-foreground truncate">
-              {user.name}
+              {user?.name || 'Usuário'}
             </span>
             <span className="text-xs text-sidebar-foreground/60 truncate">
-              {user.email}
+              {user?.email || ''}
             </span>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
