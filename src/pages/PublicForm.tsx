@@ -1,0 +1,617 @@
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, Service } from '@/types';
+import { formsApi, servicesApi } from '@/lib/api';
+import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+
+interface PersonalInfo {
+  nome: string;
+  email: string;
+  cpf: string;
+  genero: string;
+  empresa: string;
+  whatsapp: string;
+  dataNascimento: string;
+  cep: string;
+}
+
+interface ServiceSelection {
+  serviceId: string;
+  frequency: string;
+}
+
+const PublicForm = () => {
+  const { formId } = useParams<{ formId: string }>();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [form, setForm] = useState<Form | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [videoWatched, setVideoWatched] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    nome: '',
+    email: '',
+    cpf: '',
+    genero: '',
+    empresa: '',
+    whatsapp: '',
+    dataNascimento: '',
+    cep: '',
+  });
+  const [serviceSelections, setServiceSelections] = useState<ServiceSelection[]>([]);
+  const videoRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const loadFormData = async () => {
+      if (!formId) return;
+      
+      try {
+        const forms = await formsApi.list();
+        const foundForm = forms.find((f: Form) => f.id === formId);
+        
+        if (foundForm) {
+          setForm(foundForm);
+          const allServices = await servicesApi.list();
+          setServices(allServices);
+          
+          // Initialize service selections
+          const initialSelections = foundForm.serviceOptions.map(opt => ({
+            serviceId: opt.serviceId,
+            frequency: '',
+          }));
+          setServiceSelections(initialSelections);
+        }
+      } catch (error) {
+        console.error('Error loading form:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFormData();
+  }, [formId]);
+
+  const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
+    setPersonalInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleServiceFrequencyChange = (serviceId: string, frequency: string) => {
+    setServiceSelections(prev => 
+      prev.map(sel => 
+        sel.serviceId === serviceId ? { ...sel, frequency } : sel
+      )
+    );
+  };
+
+  const getServiceById = (id: string) => services.find(s => s.id === id);
+
+  const isPersonalInfoValid = () => {
+    return personalInfo.nome && personalInfo.email && personalInfo.cpf && 
+           personalInfo.genero && personalInfo.whatsapp && personalInfo.dataNascimento && personalInfo.cep;
+  };
+
+  const isServicesValid = () => {
+    return serviceSelections.every(sel => sel.frequency !== '');
+  };
+
+  const calculateTotal = () => {
+    return serviceSelections.reduce((total, sel) => {
+      const service = getServiceById(sel.serviceId);
+      if (!service || !sel.frequency) return total;
+      const frequencyMultiplier = parseInt(sel.frequency.replace('x', ''));
+      return total + (service.price * frequencyMultiplier);
+    }, 0);
+  };
+
+  const handleConfirm = () => {
+    // Here you would send the data to the API
+    console.log('Submitting:', { personalInfo, serviceSelections, formId });
+    setCurrentStep(6);
+  };
+
+  const nextStep = () => setCurrentStep(prev => prev + 1);
+  const prevStep = () => setCurrentStep(prev => prev - 1);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!form) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-xl font-semibold text-destructive mb-2">Formulário não encontrado</h2>
+            <p className="text-muted-foreground">O link que você acessou não é válido.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const steps = [
+    { icon: Sparkles, label: 'Bem-vindo' },
+    { icon: Play, label: 'Vídeo' },
+    { icon: FileText, label: 'Termos' },
+    { icon: User, label: 'Dados' },
+    { icon: ShoppingCart, label: 'Serviços' },
+    { icon: CheckCircle, label: 'Resumo' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
+      {/* Progress Steps */}
+      {currentStep < 6 && (
+        <div className="bg-card border-b shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              {steps.map((step, index) => (
+                <div key={index} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                    index <= currentStep 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    <step.icon className="h-5 w-5" />
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className={`hidden sm:block w-12 lg:w-24 h-1 mx-2 rounded ${
+                      index < currentStep ? 'bg-primary' : 'bg-muted'
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Step 0: Welcome */}
+        {currentStep === 0 && (
+          <Card className="text-center">
+            <CardContent className="pt-12 pb-12">
+              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-12 w-12 text-primary" />
+              </div>
+              <h1 className="text-3xl font-bold mb-4">Bem-vindo!</h1>
+              <p className="text-muted-foreground mb-2 text-lg">{form.name}</p>
+              <p className="text-muted-foreground mb-8">{form.description}</p>
+              <Button size="lg" onClick={nextStep} className="px-8">
+                Cadastre-se
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 1: Video */}
+        {currentStep === 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Vídeo de Introdução
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Assista ao vídeo abaixo para conhecer mais sobre nossos serviços.
+              </p>
+              <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
+                <iframe
+                  ref={videoRef}
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/6--8lDFBhOg?enablejsapi=1"
+                  title="Vídeo de Introdução"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div className="flex items-center gap-2 mb-6">
+                <Checkbox 
+                  id="watched" 
+                  checked={videoWatched}
+                  onCheckedChange={(checked) => setVideoWatched(checked === true)}
+                />
+                <Label htmlFor="watched" className="cursor-pointer">
+                  Eu assisti ao vídeo completo
+                </Label>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prevStep}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Button onClick={nextStep} disabled={!videoWatched}>
+                  Próximo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 2: Terms */}
+        {currentStep === 2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Termos e Condições
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/50 rounded-lg p-4 h-64 overflow-y-auto mb-6 text-sm text-muted-foreground">
+                <h3 className="font-semibold text-foreground mb-2">1. Termos Gerais</h3>
+                <p className="mb-4">
+                  Ao utilizar nossos serviços, você concorda com os seguintes termos e condições. 
+                  Por favor, leia atentamente antes de prosseguir.
+                </p>
+                <h3 className="font-semibold text-foreground mb-2">2. Serviços</h3>
+                <p className="mb-4">
+                  Os serviços oferecidos estão sujeitos a disponibilidade e podem ser alterados 
+                  sem aviso prévio. Reservamo-nos o direito de recusar serviço a qualquer pessoa.
+                </p>
+                <h3 className="font-semibold text-foreground mb-2">3. Pagamentos</h3>
+                <p className="mb-4">
+                  Os pagamentos devem ser realizados conforme acordado. Cancelamentos devem ser 
+                  feitos com antecedência mínima de 24 horas.
+                </p>
+                <h3 className="font-semibold text-foreground mb-2">4. Privacidade</h3>
+                <p className="mb-4">
+                  Seus dados pessoais serão tratados de acordo com nossa política de privacidade 
+                  e em conformidade com a LGPD.
+                </p>
+                <h3 className="font-semibold text-foreground mb-2">5. Responsabilidades</h3>
+                <p>
+                  O cliente é responsável por fornecer informações precisas e manter seus dados 
+                  de contato atualizados.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 mb-6">
+                <Checkbox 
+                  id="terms" 
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                />
+                <Label htmlFor="terms" className="cursor-pointer">
+                  Li e aceito os termos e condições
+                </Label>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prevStep}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Button onClick={nextStep} disabled={!termsAccepted}>
+                  Próximo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 3: Personal Info */}
+        {currentStep === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Informações Pessoais
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="space-y-2">
+                  <Label htmlFor="nome">Nome *</Label>
+                  <Input
+                    id="nome"
+                    value={personalInfo.nome}
+                    onChange={(e) => handlePersonalInfoChange('nome', e.target.value)}
+                    placeholder="Seu nome completo"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={personalInfo.email}
+                    onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
+                    placeholder="seu@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cpf">CPF *</Label>
+                  <Input
+                    id="cpf"
+                    value={personalInfo.cpf}
+                    onChange={(e) => handlePersonalInfoChange('cpf', e.target.value)}
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="genero">Gênero *</Label>
+                  <Select 
+                    value={personalInfo.genero} 
+                    onValueChange={(value) => handlePersonalInfoChange('genero', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="empresa">Empresa</Label>
+                  <Input
+                    id="empresa"
+                    value={personalInfo.empresa}
+                    onChange={(e) => handlePersonalInfoChange('empresa', e.target.value)}
+                    placeholder="Nome da empresa (opcional)"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp *</Label>
+                  <Input
+                    id="whatsapp"
+                    value={personalInfo.whatsapp}
+                    onChange={(e) => handlePersonalInfoChange('whatsapp', e.target.value)}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dataNascimento">Data de Nascimento *</Label>
+                  <Input
+                    id="dataNascimento"
+                    type="date"
+                    value={personalInfo.dataNascimento}
+                    onChange={(e) => handlePersonalInfoChange('dataNascimento', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cep">CEP *</Label>
+                  <Input
+                    id="cep"
+                    value={personalInfo.cep}
+                    onChange={(e) => handlePersonalInfoChange('cep', e.target.value)}
+                    placeholder="00000-000"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prevStep}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Button onClick={nextStep} disabled={!isPersonalInfoValid()}>
+                  Próximo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4: Services Selection */}
+        {currentStep === 4 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Selecione seus Serviços
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-6">
+                Escolha a frequência desejada para cada serviço do seu plano.
+              </p>
+              <div className="space-y-4 mb-6">
+                {form.serviceOptions.map((option, index) => {
+                  const service = getServiceById(option.serviceId);
+                  const selection = serviceSelections.find(s => s.serviceId === option.serviceId);
+                  
+                  if (!service) return null;
+                  
+                  return (
+                    <Card key={index} className="border-2">
+                      <CardContent className="pt-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold">{service.name}</h3>
+                            <p className="text-sm text-muted-foreground">{service.description}</p>
+                            <p className="text-primary font-medium mt-1">
+                              R$ {service.price.toFixed(2)} por sessão
+                            </p>
+                          </div>
+                          <div className="w-full md:w-48">
+                            <Label className="text-xs text-muted-foreground mb-1 block">
+                              Frequência
+                            </Label>
+                            <Select 
+                              value={selection?.frequency || ''}
+                              onValueChange={(value) => handleServiceFrequencyChange(option.serviceId, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1x">1x por mês</SelectItem>
+                                <SelectItem value="2x">2x por mês</SelectItem>
+                                <SelectItem value="3x">3x por mês</SelectItem>
+                                <SelectItem value="4x">4x por mês</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        {option.secondaryServiceIds.length > 0 && (
+                          <div className="mt-4 pt-4 border-t">
+                            <p className="text-xs text-muted-foreground mb-2">Opções secundárias incluídas:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {option.secondaryServiceIds.map(secId => {
+                                const secService = getServiceById(secId);
+                                if (!secService) return null;
+                                return (
+                                  <span key={secId} className="text-xs bg-muted px-2 py-1 rounded">
+                                    {secService.name}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+              
+              <div className="bg-primary/5 rounded-lg p-4 mb-6">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total Mensal Estimado:</span>
+                  <span className="text-2xl font-bold text-primary">
+                    R$ {calculateTotal().toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prevStep}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Button onClick={nextStep} disabled={!isServicesValid()}>
+                  Próximo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 5: Summary */}
+        {currentStep === 5 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Resumo do Cadastro
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6 mb-6">
+                {/* Personal Info Summary */}
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">Dados Pessoais</h3>
+                  <div className="bg-muted/50 rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div><span className="text-muted-foreground">Nome:</span> {personalInfo.nome}</div>
+                    <div><span className="text-muted-foreground">Email:</span> {personalInfo.email}</div>
+                    <div><span className="text-muted-foreground">CPF:</span> {personalInfo.cpf}</div>
+                    <div><span className="text-muted-foreground">Gênero:</span> {personalInfo.genero}</div>
+                    <div><span className="text-muted-foreground">WhatsApp:</span> {personalInfo.whatsapp}</div>
+                    <div><span className="text-muted-foreground">Nascimento:</span> {personalInfo.dataNascimento}</div>
+                    <div><span className="text-muted-foreground">CEP:</span> {personalInfo.cep}</div>
+                    {personalInfo.empresa && (
+                      <div><span className="text-muted-foreground">Empresa:</span> {personalInfo.empresa}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Services Summary */}
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">Serviços Selecionados</h3>
+                  <div className="space-y-2">
+                    {serviceSelections.map((sel, index) => {
+                      const service = getServiceById(sel.serviceId);
+                      if (!service) return null;
+                      const frequencyNum = parseInt(sel.frequency.replace('x', ''));
+                      const subtotal = service.price * frequencyNum;
+                      
+                      return (
+                        <div key={index} className="bg-muted/50 rounded-lg p-4 flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {sel.frequency} por mês × R$ {service.price.toFixed(2)}
+                            </p>
+                          </div>
+                          <span className="font-semibold">R$ {subtotal.toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="bg-primary text-primary-foreground rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-lg">Total Mensal:</span>
+                    <span className="text-3xl font-bold">
+                      R$ {calculateTotal().toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prevStep}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Button onClick={handleConfirm} size="lg" className="px-8">
+                  Confirmar Cadastro
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 6: Thank You */}
+        {currentStep === 6 && (
+          <Card className="text-center">
+            <CardContent className="pt-12 pb-12">
+              <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
+              </div>
+              <h1 className="text-3xl font-bold mb-4">Obrigado!</h1>
+              <p className="text-muted-foreground mb-2 text-lg">
+                Seu cadastro foi realizado com sucesso.
+              </p>
+              <p className="text-muted-foreground mb-8">
+                Em breve entraremos em contato para confirmar seu plano.
+              </p>
+              <div className="bg-muted/50 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-sm text-muted-foreground mb-2">Plano selecionado:</p>
+                <p className="text-2xl font-bold text-primary">
+                  R$ {calculateTotal().toFixed(2)}/mês
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PublicForm;
