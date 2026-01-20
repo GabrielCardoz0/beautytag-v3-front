@@ -13,6 +13,7 @@ import PartnerDetails from "./pages/PartnerDetails";
 import Services from "./pages/Services";
 import Forms from "./pages/Forms";
 import Settings from "./pages/Settings";
+import PublicForm from "./pages/PublicForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,8 +42,14 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Public routes */}
+      <Route path="/form/:formId" element={<PublicForm />} />
+      
+      {/* Auth routes */}
       <Route path="/login" element={isAuthenticated ? <Navigate to="/calendar" replace /> : <Login />} />
       <Route path="/" element={<Navigate to={isAuthenticated ? "/calendar" : "/login"} replace />} />
+      
+      {/* Protected routes */}
       <Route path="/calendar" element={<ProtectedRoute><Layout><Calendar /></Layout></ProtectedRoute>} />
       <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
       <Route path="/partners/:id" element={<ProtectedRoute><Layout><PartnerDetails /></Layout></ProtectedRoute>} />
