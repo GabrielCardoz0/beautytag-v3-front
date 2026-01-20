@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, FileText, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, FileText, Trash2, Eye, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +33,21 @@ export default function Forms() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyLink = async (formId: string) => {
+    const baseUrl = window.location.origin;
+    const publicUrl = `${baseUrl}/form/${formId}`;
+    
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setCopiedId(formId);
+      toast.success('Link copiado!');
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      toast.error('Erro ao copiar link');
+    }
+  };
 
   const handleSaveForm = (formData: Omit<Form, 'id' | 'createdAt'>) => {
     const newForm: Form = {
@@ -114,6 +129,18 @@ export default function Forms() {
                     </div>
                   </div>
                   <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleCopyLink(form.id)}
+                      title="Copiar link público"
+                    >
+                      {copiedId === form.id ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
