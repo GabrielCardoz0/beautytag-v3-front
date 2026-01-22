@@ -9,8 +9,11 @@ import { AppointmentDetailsModal } from "@/components/AppointmentDetailsModal";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-// Mock data
-const mockAppointments: Appointment[] = [
+// Mock data with dates
+const today = new Date();
+const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+
+const mockAppointments: (Appointment & { date: Date })[] = [
   {
     id: "1",
     clientName: "Maria Silva",
@@ -20,7 +23,8 @@ const mockAppointments: Appointment[] = [
     duration: 60,
     price: 80,
     phone: "(11) 99999-9999",
-    notes: "Cliente preferencial, usar produtos específicos"
+    notes: "Cliente preferencial, usar produtos específicos",
+    date: addDays(weekStart, 1), // Segunda
   },
   {
     id: "2",
@@ -30,7 +34,8 @@ const mockAppointments: Appointment[] = [
     endTime: "11:00",
     duration: 30,
     price: 50,
-    phone: "(11) 98888-8888"
+    phone: "(11) 98888-8888",
+    date: addDays(weekStart, 1), // Segunda
   },
   {
     id: "3",
@@ -41,7 +46,30 @@ const mockAppointments: Appointment[] = [
     duration: 120,
     price: 150,
     phone: "(11) 97777-7777",
-    notes: "Primeira coloração, fazer teste de alergia"
+    notes: "Primeira coloração, fazer teste de alergia",
+    date: addDays(weekStart, 3), // Quarta
+  },
+  {
+    id: "4",
+    clientName: "Carlos Souza",
+    service: "Barba",
+    startTime: "11:00",
+    endTime: "11:30",
+    duration: 30,
+    price: 35,
+    phone: "(11) 96666-6666",
+    date: addDays(weekStart, 2), // Terça
+  },
+  {
+    id: "5",
+    clientName: "Paula Lima",
+    service: "Escova Progressiva",
+    startTime: "15:00",
+    endTime: "17:00",
+    duration: 120,
+    price: 200,
+    phone: "(11) 95555-5555",
+    date: addDays(weekStart, 5), // Sexta
   },
 ];
 
@@ -85,10 +113,13 @@ export default function Calendar() {
 
         <div className="pt-4">
           <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-            {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+            Semana de {format(startOfWeek(selectedDate, { weekStartsOn: 0 }), "dd/MM", { locale: ptBR })}
           </h3>
           <p className="text-2xl font-bold text-foreground">
-            {mockAppointments.length} agendamentos
+            {mockAppointments.filter(a => {
+              const weekS = startOfWeek(selectedDate, { weekStartsOn: 0 });
+              return a.date >= weekS && a.date < addDays(weekS, 7);
+            }).length} agendamentos
           </p>
         </div>
       </div>
@@ -134,8 +165,9 @@ export default function Calendar() {
                   </div>
 
                   <div className="space-y-2">
-                    {isSelected &&
-                      dayAppointments.map((appointment) => (
+                    {dayAppointments
+                      .filter(appointment => isSameDay(appointment.date, day))
+                      .map((appointment) => (
                         <AppointmentCard
                           key={appointment.id}
                           appointment={appointment}
