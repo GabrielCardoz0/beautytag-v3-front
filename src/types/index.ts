@@ -46,3 +46,12 @@ export interface Form {
   serviceOptions: FormServiceOption[];
   createdAt: string;
 }
+
+export interface Notification {
+  id: number;
+  title: string;
+  is_read: boolean;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+}

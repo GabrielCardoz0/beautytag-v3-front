@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configuração base do axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: 'http://localhost:4000',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,12 +12,9 @@ const api = axios.create({
 // Interceptor para adicionar token de autenticação
 api.interceptors.request.use(
   (config) => {
-    const user = localStorage.getItem('platai-user');
-    if (user) {
-      const parsed = JSON.parse(user);
-      if (parsed?.token) {
-        config.headers.Authorization = `Bearer ${parsed.token}`;
-      }
+    const token = localStorage.getItem('platai-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -31,6 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      localStorage.removeItem('platai-token');
       localStorage.removeItem('platai-user');
       window.location.href = '/login';
     }
@@ -161,21 +159,78 @@ export const formsApi = {
 // Auth API
 export const authApi = {
   login: async (email: string, password: string) => {
-    // Mock login - em produção seria uma chamada real
-    // Simula delay de rede
+    // Em produção: POST /auth/login retorna { token: string }
+    // Mock por enquanto
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    if (email === 'admin@platai.com' && password === '123456') {
-      return {
-        user: { id: '1', name: 'Administrador', email: 'admin@platai.com' },
-        token: 'mock-jwt-token',
-      };
+    // Mock: simula chamada real
+    // const response = await api.post('/auth/login', { email, password });
+    // return response.data;
+    
+    if (email === 'joao@example.com' && password === '123456') {
+      return { token: 'mock-jwt-token-admin' };
+    }
+    if (email === 'maria@example.com' && password === '123456') {
+      return { token: 'mock-jwt-token-partner' };
     }
     throw new Error('Credenciais inválidas');
   },
   
   logout: async () => {
+    localStorage.removeItem('platai-token');
     localStorage.removeItem('platai-user');
+    return true;
+  },
+};
+
+// Notifications API
+export const notificationsApi = {
+  list: async () => {
+    // Mock: buscar do localStorage
+    const notifications = localStorage.getItem('platai-notifications');
+    return notifications ? JSON.parse(notifications) : [];
+  },
+  
+  getById: async (id: number) => {
+    const notifications = await notificationsApi.list();
+    return notifications.find((n: any) => n.id === id);
+  },
+  
+  create: async (data: { title: string; user_id: number }) => {
+    const notifications = await notificationsApi.list();
+    const newNotification = {
+      ...data,
+      id: notifications.length > 0 ? Math.max(...notifications.map((n: any) => n.id)) + 1 : 1,
+      is_read: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    localStorage.setItem('platai-notifications', JSON.stringify([...notifications, newNotification]));
+    return newNotification;
+  },
+  
+  markAsRead: async (id: number) => {
+    const notifications = await notificationsApi.list();
+    const index = notifications.findIndex((n: any) => n.id === id);
+    if (index > -1) {
+      notifications[index] = { ...notifications[index], is_read: true, updated_at: new Date().toISOString() };
+      localStorage.setItem('platai-notifications', JSON.stringify(notifications));
+      return notifications[index];
+    }
+    throw new Error('Notification not found');
+  },
+  
+  markAllAsRead: async () => {
+    const notifications = await notificationsApi.list();
+    const updated = notifications.map((n: any) => ({ ...n, is_read: true, updated_at: new Date().toISOString() }));
+    localStorage.setItem('platai-notifications', JSON.stringify(updated));
+    return updated;
+  },
+  
+  delete: async (id: number) => {
+    const notifications = await notificationsApi.list();
+    const filtered = notifications.filter((n: any) => n.id !== id);
+    localStorage.setItem('platai-notifications', JSON.stringify(filtered));
     return true;
   },
 };
