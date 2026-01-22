@@ -13,16 +13,21 @@ import PartnerDetails from "./pages/PartnerDetails";
 import Services from "./pages/Services";
 import Forms from "./pages/Forms";
 import Settings from "./pages/Settings";
+import BotSettings from "./pages/BotSettings";
 import PublicForm from "./pages/PublicForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
+  const { isAuthenticated, user } = useAuth();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/calendar" replace />;
   }
   
   return <>{children}</>;
@@ -49,13 +54,17 @@ const AppRoutes = () => {
       <Route path="/login" element={isAuthenticated ? <Navigate to="/calendar" replace /> : <Login />} />
       <Route path="/" element={<Navigate to={isAuthenticated ? "/calendar" : "/login"} replace />} />
       
-      {/* Protected routes */}
+      {/* Protected routes - All roles */}
       <Route path="/calendar" element={<ProtectedRoute><Layout><Calendar /></Layout></ProtectedRoute>} />
-      <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
-      <Route path="/partners/:id" element={<ProtectedRoute><Layout><PartnerDetails /></Layout></ProtectedRoute>} />
       <Route path="/services" element={<ProtectedRoute><Layout><Services /></Layout></ProtectedRoute>} />
-      <Route path="/forms" element={<ProtectedRoute><Layout><Forms /></Layout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+      
+      {/* Protected routes - Admin only */}
+      <Route path="/partners" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Partners /></Layout></ProtectedRoute>} />
+      <Route path="/partners/:id" element={<ProtectedRoute allowedRoles={['admin']}><Layout><PartnerDetails /></Layout></ProtectedRoute>} />
+      <Route path="/forms" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Forms /></Layout></ProtectedRoute>} />
+      <Route path="/bot-settings" element={<ProtectedRoute allowedRoles={['admin']}><Layout><BotSettings /></Layout></ProtectedRoute>} />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

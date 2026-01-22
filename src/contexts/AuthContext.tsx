@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@/types';
+import { User, UserRole } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -11,8 +11,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const MOCK_USERS = [
-  { id: '1', name: 'João Silva', email: 'joao@example.com', password: '123456' },
-  { id: '2', name: 'Maria Santos', email: 'maria@example.com', password: '123456' },
+  { id: '1', name: 'João Silva', email: 'joao@example.com', password: '123456', role: 'admin' as UserRole },
+  { id: '2', name: 'Maria Santos', email: 'maria@example.com', password: '123456', role: 'partner' as UserRole },
 ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
