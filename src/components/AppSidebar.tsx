@@ -1,4 +1,4 @@
-import { Calendar, Users, Scissors, Settings, Building2, LogOut, FileText } from "lucide-react";
+import { Calendar, Scissors, Settings, Building2, LogOut, FileText, Bot } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -15,13 +15,15 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const menuItems = [
-  { title: "Calendário", url: "/calendar", icon: Calendar },
-  { title: "Parceiros", url: "/partners", icon: Building2 },
-  { title: "Serviços", url: "/services", icon: Scissors },
-  { title: "Formulários", url: "/forms", icon: FileText },
-  { title: "Configurações", url: "/settings", icon: Settings },
+const allMenuItems = [
+  { title: "Calendário", url: "/calendar", icon: Calendar, roles: ['admin', 'partner'] },
+  { title: "Parceiros", url: "/partners", icon: Building2, roles: ['admin'] },
+  { title: "Serviços", url: "/services", icon: Scissors, roles: ['admin', 'partner'] },
+  { title: "Formulários", url: "/forms", icon: FileText, roles: ['admin'] },
+  { title: "Bot de Atendimento", url: "/bot-settings", icon: Bot, roles: ['admin'] },
+  { title: "Configurações", url: "/settings", icon: Settings, roles: ['admin', 'partner'] },
 ];
 
 export function AppSidebar() {
@@ -32,6 +34,9 @@ export function AppSidebar() {
     logout();
     navigate('/login');
   };
+
+  const userRole = user?.role || 'partner';
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <Sidebar>
@@ -78,9 +83,14 @@ export function AppSidebar() {
             <span className="text-sm font-medium text-sidebar-foreground truncate">
               {user?.name || 'Usuário'}
             </span>
-            <span className="text-xs text-sidebar-foreground/60 truncate">
-              {user?.email || ''}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-sidebar-foreground/60 truncate">
+                {user?.email || ''}
+              </span>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                {userRole === 'admin' ? 'Admin' : 'Parceiro'}
+              </Badge>
+            </div>
           </div>
           <Button
             variant="ghost"

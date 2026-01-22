@@ -1,3 +1,5 @@
+export type UserRole = 'admin' | 'partner';
+
 export interface Partner {
   id: string;
   name: string;
@@ -29,6 +31,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
 }
 
 export interface FormServiceOption {
