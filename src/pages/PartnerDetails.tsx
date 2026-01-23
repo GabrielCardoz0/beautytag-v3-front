@@ -18,19 +18,17 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Partner, Service } from '@/types';
+import { Partner } from '@/types';
 import { toast } from 'sonner';
 
 export default function PartnerDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [partners, setPartners] = useLocalStorage<Partner[]>('platai-partners', []);
-  const [services] = useLocalStorage<Service[]>('platai-services', []);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partner | null>(null);
 
   const partner = partners.find(p => p.id === id);
-  const partnerServices = services.filter(s => s.partnerId === id);
 
   useEffect(() => {
     if (partner && !editData) {
@@ -292,37 +290,13 @@ export default function PartnerDetails() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {partnerServices.length === 0 ? (
-                <div className="text-center py-8">
-                  <Scissors className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">Nenhum serviço vinculado a este parceiro</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate('/services')}>
-                    Ir para Serviços
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {partnerServices.map(service => (
-                    <div
-                      key={service.id}
-                      className="flex items-center justify-between p-4 rounded-lg border bg-muted/30"
-                    >
-                      <div>
-                        <h4 className="font-medium text-foreground">{service.name}</h4>
-                        <p className="text-sm text-muted-foreground">{service.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-foreground">
-                          R$ {service.price.toFixed(2)}
-                        </p>
-                        <Badge variant="secondary" className="mt-1">
-                          {service.gender}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="text-center py-8">
+                <Scissors className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">Serviços são gerenciados na aba Serviços</p>
+                <Button variant="outline" className="mt-4" onClick={() => navigate('/services')}>
+                  Ir para Serviços
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -333,10 +307,6 @@ export default function PartnerDetails() {
               <CardTitle className="text-lg">Resumo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Serviços</span>
-                <span className="font-semibold">{partnerServices.length}</span>
-              </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Cadastrado em</span>
                 <span className="font-semibold">

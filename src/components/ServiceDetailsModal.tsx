@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, User, Building2 } from 'lucide-react';
+import { Pencil, Trash2, Clock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,13 +14,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Service, Partner } from '@/types';
+import { Service } from '@/types';
 
 interface ServiceDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   service: Service | null;
-  partner: Partner | null;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -29,7 +28,6 @@ export function ServiceDetailsModal({
   open, 
   onOpenChange, 
   service, 
-  partner,
   onEdit, 
   onDelete 
 }: ServiceDetailsModalProps) {
@@ -75,9 +73,15 @@ export function ServiceDetailsModal({
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-xl">{service.name}</DialogTitle>
-              <Badge className={`mt-2 ${getGenderColor(service.gender)}`}>
-                {getGenderLabel(service.gender)}
-              </Badge>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge className={getGenderColor(service.gender)}>
+                  {getGenderLabel(service.gender)}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {service.spentTime} min
+                </Badge>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="icon" onClick={onEdit}>
@@ -113,16 +117,6 @@ export function ServiceDetailsModal({
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-1">Descrição</h4>
               <p className="text-foreground">{service.description}</p>
-            </div>
-          )}
-
-          {partner && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Parceiro</p>
-                <p className="font-medium text-foreground">{partner.name}</p>
-              </div>
             </div>
           )}
 
