@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { Service, Form, FormServiceOption } from '@/types';
+import { Service, FormServiceOption } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 interface FormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (form: Omit<Form, 'id' | 'createdAt'>) => void;
+  onSave: (form: { name: string; description: string; serviceOptions: FormServiceOption[] }) => void;
   services: Service[];
 }
 
@@ -32,7 +32,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
   };
 
   const addServiceOption = () => {
-    setServiceOptions(prev => [...prev, { serviceId: '', secondaryServiceIds: [] }]);
+    setServiceOptions(prev => [...prev, { serviceId: 0, secondaryServiceIds: [] }]);
     setExpandedIndex(serviceOptions.length);
   };
 
@@ -41,13 +41,13 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
     if (expandedIndex === index) setExpandedIndex(null);
   };
 
-  const updateServiceOption = (index: number, serviceId: string) => {
+  const updateServiceOption = (index: number, serviceId: number) => {
     setServiceOptions(prev => prev.map((opt, i) => 
       i === index ? { ...opt, serviceId, secondaryServiceIds: [] } : opt
     ));
   };
 
-  const toggleSecondaryService = (optionIndex: number, serviceId: string) => {
+  const toggleSecondaryService = (optionIndex: number, serviceId: number) => {
     setServiceOptions(prev => prev.map((opt, i) => {
       if (i !== optionIndex) return opt;
       const exists = opt.secondaryServiceIds.includes(serviceId);
@@ -60,7 +60,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
     }));
   };
 
-  const getServiceById = (id: string) => services.find(s => s.id === id);
+  const getServiceById = (id: number) => services.find(s => s.id === id);
 
   const getAvailableServices = (currentIndex: number) => {
     const usedServiceIds = serviceOptions
@@ -82,7 +82,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
       return;
     }
 
-    const validOptions = serviceOptions.filter(opt => opt.serviceId);
+    const validOptions = serviceOptions.filter(opt => opt.serviceId > 0);
     if (validOptions.length === 0) {
       toast.error('Adicione pelo menos um serviço ao formulário');
       return;
@@ -98,7 +98,6 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
     setServiceOptions([]);
     setExpandedIndex(null);
     onOpenChange(false);
-    toast.success('Formulário cadastrado com sucesso!');
   };
 
   const resetForm = () => {
@@ -174,15 +173,15 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                             <div className="flex-1">
                               <Label className="text-sm text-muted-foreground mb-2 block">Serviço Principal</Label>
                               <Select 
-                                value={option.serviceId} 
-                                onValueChange={(value) => updateServiceOption(index, value)}
+                                value={option.serviceId > 0 ? option.serviceId.toString() : ''} 
+                                onValueChange={(value) => updateServiceOption(index, parseInt(value))}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Selecione um serviço" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {getAvailableServices(index).map(s => (
-                                    <SelectItem key={s.id} value={s.id}>
+                                    <SelectItem key={s.id} value={s.id.toString()}>
                                       {s.name} - R$ {s.price.toFixed(2)}
                                     </SelectItem>
                                   ))}
@@ -191,7 +190,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                             </div>
                             <div className="flex items-center gap-2 pt-6">
                               <CollapsibleTrigger asChild>
-                                <Button type="button" variant="ghost" size="icon" disabled={!option.serviceId}>
+                                <Button type="button" variant="ghost" size="icon" disabled={option.serviceId <= 0}>
                                   {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                 </Button>
                               </CollapsibleTrigger>

@@ -1,45 +1,99 @@
-import { useState } from 'react';
-import { Plus, Search, Scissors } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Scissors, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ServiceModal } from '@/components/ServiceModal';
 import { ServiceDetailsModal } from '@/components/ServiceDetailsModal';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Service, Partner } from '@/types';
+import { Service } from '@/types';
+import { servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function Services() {
-  const [services, setServices] = useLocalStorage<Service[]>('platai-services', []);
-  const [partners] = useLocalStorage<Partner[]>('platai-partners', []);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
 
-  const handleSaveService = (serviceData: Omit<Service, 'id' | 'createdAt'>) => {
-    const newService: Service = {
-      ...serviceData,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    setServices(prev => [...prev, newService]);
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      setLoading(true);
+      const data = await servicesApi.list();
+      setServices(data);
+    } catch (error) {
+      console.error('Error loading services:', error);
+      toast.error('Erro ao carregar serviços');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdateService = (id: string, serviceData: Omit<Service, 'id' | 'createdAt'>) => {
-    setServices(prev => prev.map(s => 
-      s.id === id ? { ...s, ...serviceData } : s
-    ));
-    setEditingService(null);
+  const handleSaveService = async (serviceData: {
+    name: string;
+    description: string;
+    price: number;
+    gender: 'masculino' | 'feminino' | 'unissex';
+    spentTime: number;
+  }) => {
+    try {
+      await servicesApi.create({
+        name: serviceData.name,
+        description: serviceData.description,
+        price: serviceData.price,
+        genre: serviceData.gender,
+        spent_time: serviceData.spentTime,
+      });
+      toast.success('Serviço cadastrado com sucesso!');
+      loadServices();
+    } catch (error) {
+      console.error('Error creating service:', error);
+      toast.error('Erro ao cadastrar serviço');
+    }
   };
 
-  const handleDeleteService = (id: string) => {
-    setServices(prev => prev.filter(s => s.id !== id));
-    setIsDetailsOpen(false);
-    setSelectedService(null);
-    toast.success('Serviço excluído com sucesso!');
+  const handleUpdateService = async (id: number, serviceData: {
+    name: string;
+    description: string;
+    price: number;
+    gender: 'masculino' | 'feminino' | 'unissex';
+    spentTime: number;
+  }) => {
+    try {
+      await servicesApi.update(id, {
+        name: serviceData.name,
+        description: serviceData.description,
+        price: serviceData.price,
+        genre: serviceData.gender,
+        spent_time: serviceData.spentTime,
+      });
+      toast.success('Serviço atualizado com sucesso!');
+      setEditingService(null);
+      loadServices();
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast.error('Erro ao atualizar serviço');
+    }
+  };
+
+  const handleDeleteService = async (id: number) => {
+    try {
+      await servicesApi.delete(id);
+      setIsDetailsOpen(false);
+      setSelectedService(null);
+      toast.success('Serviço excluído com sucesso!');
+      loadServices();
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error('Erro ao excluir serviço');
+    }
   };
 
   const handleServiceClick = (service: Service) => {
@@ -51,15 +105,6 @@ export default function Services() {
     setIsDetailsOpen(false);
     setEditingService(selectedService);
     setIsModalOpen(true);
-  };
-
-  const getPartnerName = (partnerId: string) => {
-    const partner = partners.find(p => p.id === partnerId);
-    return partner?.name || 'Parceiro não encontrado';
-  };
-
-  const getPartnerById = (partnerId: string) => {
-    return partners.find(p => p.id === partnerId) || null;
   };
 
   const filteredServices = services.filter(service =>
@@ -75,6 +120,14 @@ export default function Services() {
       default: return '';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -128,7 +181,7 @@ export default function Services() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{service.name}</h3>
-                      <p className="text-sm text-muted-foreground">{getPartnerName(service.partnerId)}</p>
+                      <p className="text-sm text-muted-foreground">{service.spentTime} min</p>
                     </div>
                   </div>
                   <Badge className={getGenderColor(service.gender)}>
@@ -162,7 +215,6 @@ export default function Services() {
         onOpenChange={setIsModalOpen}
         onSave={handleSaveService}
         onUpdate={handleUpdateService}
-        partners={partners}
         editingService={editingService}
       />
 
@@ -170,7 +222,6 @@ export default function Services() {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
         service={selectedService}
-        partner={selectedService ? getPartnerById(selectedService.partnerId) : null}
         onEdit={handleEditFromDetails}
         onDelete={() => selectedService && handleDeleteService(selectedService.id)}
       />

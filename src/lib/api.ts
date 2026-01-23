@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ApiService, ApiForm, Service, Form, apiServiceToService, apiFormToForm } from '@/types';
 
 // Configuração base do axios
 const api = axios.create({
@@ -38,12 +39,11 @@ api.interceptors.response.use(
 
 export default api;
 
-// ============ Mock API Services ============
+// ============ API Services (Real) ============
 
-// Partners API
+// Partners API (ainda mockado)
 export const partnersApi = {
   list: async () => {
-    // Mock: buscar do localStorage
     const partners = localStorage.getItem('platai-partners');
     return partners ? JSON.parse(partners) : [];
   },
@@ -54,7 +54,6 @@ export const partnersApi = {
   },
   
   create: async (data: any) => {
-    // Mock: adicionar ao localStorage
     const partners = await partnersApi.list();
     const newPartner = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
     localStorage.setItem('platai-partners', JSON.stringify([...partners, newPartner]));
@@ -80,78 +79,100 @@ export const partnersApi = {
   },
 };
 
-// Services API
+// Services API (Real)
 export const servicesApi = {
-  list: async () => {
-    const services = localStorage.getItem('platai-services');
-    return services ? JSON.parse(services) : [];
+  list: async (): Promise<Service[]> => {
+    const response = await api.get<{ services: ApiService[] }>('/services');
+    return response.data.services.map(apiServiceToService);
   },
   
-  getById: async (id: string) => {
+  getById: async (id: number): Promise<Service | undefined> => {
     const services = await servicesApi.list();
-    return services.find((s: any) => s.id === id);
+    return services.find(s => s.id === id);
   },
   
-  create: async (data: any) => {
-    const services = await servicesApi.list();
-    const newService = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    localStorage.setItem('platai-services', JSON.stringify([...services, newService]));
-    return newService;
+  create: async (data: {
+    name: string;
+    description: string;
+    price: number; // em reais
+    genre: string;
+    spent_time: number;
+  }): Promise<Service> => {
+    const response = await api.post<{ service: ApiService }>('/services', {
+      name: data.name,
+      description: data.description,
+      price: Math.round(data.price * 100), // converte reais para centavos
+      genre: data.genre,
+      spent_time: data.spent_time,
+    });
+    return apiServiceToService(response.data.service);
   },
   
-  update: async (id: string, data: any) => {
-    const services = await servicesApi.list();
-    const index = services.findIndex((s: any) => s.id === id);
-    if (index > -1) {
-      services[index] = { ...services[index], ...data };
-      localStorage.setItem('platai-services', JSON.stringify(services));
-      return services[index];
+  update: async (id: number, data: {
+    name?: string;
+    description?: string;
+    price?: number; // em reais
+    genre?: string;
+    spent_time?: number;
+    is_active?: boolean;
+  }): Promise<Service> => {
+    const payload: any = { ...data };
+    if (data.price !== undefined) {
+      payload.price = Math.round(data.price * 100); // converte reais para centavos
     }
-    throw new Error('Service not found');
+    const response = await api.put<{ service: ApiService }>(`/services/${id}`, payload);
+    return apiServiceToService(response.data.service);
   },
   
-  delete: async (id: string) => {
-    const services = await servicesApi.list();
-    const filtered = services.filter((s: any) => s.id !== id);
-    localStorage.setItem('platai-services', JSON.stringify(filtered));
+  delete: async (id: number): Promise<boolean> => {
+    await api.delete(`/services/${id}`);
     return true;
   },
 };
 
-// Forms API
+// Forms API (Real)
 export const formsApi = {
-  list: async () => {
-    const forms = localStorage.getItem('platai-forms');
-    return forms ? JSON.parse(forms) : [];
+  list: async (): Promise<Form[]> => {
+    const response = await api.get<{ forms: ApiForm[] }>('/forms');
+    return response.data.forms.map(apiFormToForm);
   },
   
-  getById: async (id: string) => {
-    const forms = await formsApi.list();
-    return forms.find((f: any) => f.id === id);
-  },
-  
-  create: async (data: any) => {
-    const forms = await formsApi.list();
-    const newForm = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    localStorage.setItem('platai-forms', JSON.stringify([...forms, newForm]));
-    return newForm;
-  },
-  
-  update: async (id: string, data: any) => {
-    const forms = await formsApi.list();
-    const index = forms.findIndex((f: any) => f.id === id);
-    if (index > -1) {
-      forms[index] = { ...forms[index], ...data };
-      localStorage.setItem('platai-forms', JSON.stringify(forms));
-      return forms[index];
+  getById: async (id: number): Promise<Form | null> => {
+    try {
+      const response = await axios.get<{ forms: ApiForm }>(`http://localhost:4000/forms/${id}`);
+      return apiFormToForm(response.data.forms);
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      return null;
     }
-    throw new Error('Form not found');
   },
   
-  delete: async (id: string) => {
-    const forms = await formsApi.list();
-    const filtered = forms.filter((f: any) => f.id !== id);
-    localStorage.setItem('platai-forms', JSON.stringify(filtered));
+  create: async (data: {
+    name: string;
+    description?: string;
+    forms_options: Array<{
+      id: number;
+      secondary_options?: Array<{ id: number }>;
+    }>;
+  }): Promise<Form> => {
+    const response = await api.post<{ form: ApiForm }>('/forms', data);
+    return apiFormToForm(response.data.form);
+  },
+  
+  update: async (id: number, data: {
+    name?: string;
+    description?: string;
+    forms_options?: Array<{
+      id: number;
+      secondary_options?: Array<{ id: number }>;
+    }>;
+  }): Promise<Form> => {
+    const response = await api.put<{ form: ApiForm }>(`/forms/${id}`, data);
+    return apiFormToForm(response.data.form);
+  },
+  
+  delete: async (id: number): Promise<boolean> => {
+    await api.delete(`/forms/${id}`);
     return true;
   },
 };
@@ -183,10 +204,9 @@ export const authApi = {
   },
 };
 
-// Notifications API
+// Notifications API (ainda mockado)
 export const notificationsApi = {
   list: async () => {
-    // Mock: buscar do localStorage
     const notifications = localStorage.getItem('platai-notifications');
     return notifications ? JSON.parse(notifications) : [];
   },

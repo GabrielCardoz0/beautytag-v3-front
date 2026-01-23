@@ -6,9 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, Service } from '@/types';
-import { formsApi, servicesApi } from '@/lib/api';
+import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm } from '@/types';
 import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
 
 interface PersonalInfo {
   nome: string;
@@ -22,7 +22,7 @@ interface PersonalInfo {
 }
 
 interface ServiceSelection {
-  serviceId: string;
+  serviceId: number;
   frequency: string;
 }
 
@@ -52,16 +52,33 @@ const PublicForm = () => {
       if (!formId) return;
       
       try {
-        const forms = await formsApi.list();
-        const foundForm = forms.find((f: Form) => f.id === formId);
+        // Buscar formulário pela API pública (sem autenticação)
+        const response = await axios.get<{ forms: ApiForm }>(`http://localhost:4000/forms/${formId}`);
+        const apiForm = response.data.forms;
         
-        if (foundForm) {
-          setForm(foundForm);
-          const allServices = await servicesApi.list();
-          setServices(allServices);
+        if (apiForm) {
+          const convertedForm = apiFormToForm(apiForm);
+          setForm(convertedForm);
+          
+          // Extrair serviços únicos das opções do formulário
+          const uniqueServices: Service[] = [];
+          apiForm.forms_options.forEach(opt => {
+            // Adicionar serviço principal
+            if (opt.options && !uniqueServices.find(s => s.id === opt.options.id)) {
+              uniqueServices.push(apiServiceToService(opt.options));
+            }
+            // Adicionar serviços secundários
+            opt.forms_options_secondary_options?.forEach(secOpt => {
+              if (!uniqueServices.find(s => s.id === secOpt.id)) {
+                uniqueServices.push(apiServiceToService(secOpt));
+              }
+            });
+          });
+          
+          setServices(uniqueServices);
           
           // Initialize service selections
-          const initialSelections = foundForm.serviceOptions.map(opt => ({
+          const initialSelections = convertedForm.serviceOptions.map(opt => ({
             serviceId: opt.serviceId,
             frequency: '',
           }));
@@ -81,7 +98,7 @@ const PublicForm = () => {
     setPersonalInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleServiceFrequencyChange = (serviceId: string, frequency: string) => {
+  const handleServiceFrequencyChange = (serviceId: number, frequency: string) => {
     setServiceSelections(prev => 
       prev.map(sel => 
         sel.serviceId === serviceId ? { ...sel, frequency } : sel
@@ -89,7 +106,7 @@ const PublicForm = () => {
     );
   };
 
-  const getServiceById = (id: string) => services.find(s => s.id === id);
+  const getServiceById = (id: number) => services.find(s => s.id === id);
 
   const isPersonalInfoValid = () => {
     return personalInfo.nome && personalInfo.email && personalInfo.cpf && 
@@ -443,15 +460,12 @@ const PublicForm = () => {
                             </p>
                           </div>
                           <div className="w-full md:w-48">
-                            <Label className="text-xs text-muted-foreground mb-1 block">
-                              Frequência
-                            </Label>
                             <Select 
-                              value={selection?.frequency || ''}
+                              value={selection?.frequency || ''} 
                               onValueChange={(value) => handleServiceFrequencyChange(option.serviceId, value)}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Selecione" />
+                                <SelectValue placeholder="Frequência" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="1x">1x por mês</SelectItem>
@@ -462,23 +476,6 @@ const PublicForm = () => {
                             </Select>
                           </div>
                         </div>
-                        
-                        {option.secondaryServiceIds.length > 0 && (
-                          <div className="mt-4 pt-4 border-t">
-                            <p className="text-xs text-muted-foreground mb-2">Opções secundárias incluídas:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {option.secondaryServiceIds.map(secId => {
-                                const secService = getServiceById(secId);
-                                if (!secService) return null;
-                                return (
-                                  <span key={secId} className="text-xs bg-muted px-2 py-1 rounded">
-                                    {secService.name}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
                       </CardContent>
                     </Card>
                   );
@@ -493,14 +490,14 @@ const PublicForm = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex justify-between">
                 <Button variant="outline" onClick={prevStep}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
                 </Button>
                 <Button onClick={nextStep} disabled={!isServicesValid()}>
-                  Próximo
+                  Revisar
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -518,10 +515,9 @@ const PublicForm = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6 mb-6">
-                {/* Personal Info Summary */}
+              <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-3 text-lg">Dados Pessoais</h3>
+                  <h3 className="font-semibold mb-3">Dados Pessoais</h3>
                   <div className="bg-muted/50 rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div><span className="text-muted-foreground">Nome:</span> {personalInfo.nome}</div>
                     <div><span className="text-muted-foreground">Email:</span> {personalInfo.email}</div>
@@ -536,23 +532,20 @@ const PublicForm = () => {
                   </div>
                 </div>
 
-                {/* Services Summary */}
                 <div>
-                  <h3 className="font-semibold mb-3 text-lg">Serviços Selecionados</h3>
+                  <h3 className="font-semibold mb-3">Serviços Selecionados</h3>
                   <div className="space-y-2">
                     {serviceSelections.map((sel, index) => {
                       const service = getServiceById(sel.serviceId);
                       if (!service) return null;
-                      const frequencyNum = parseInt(sel.frequency.replace('x', ''));
-                      const subtotal = service.price * frequencyNum;
+                      const frequencyMultiplier = parseInt(sel.frequency.replace('x', ''));
+                      const subtotal = service.price * frequencyMultiplier;
                       
                       return (
-                        <div key={index} className="bg-muted/50 rounded-lg p-4 flex justify-between items-center">
+                        <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                           <div>
-                            <p className="font-medium">{service.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {sel.frequency} por mês × R$ {service.price.toFixed(2)}
-                            </p>
+                            <span className="font-medium">{service.name}</span>
+                            <span className="text-muted-foreground ml-2">({sel.frequency} por mês)</span>
                           </div>
                           <span className="font-semibold">R$ {subtotal.toFixed(2)}</span>
                         </div>
@@ -561,23 +554,22 @@ const PublicForm = () => {
                   </div>
                 </div>
 
-                {/* Total */}
-                <div className="bg-primary text-primary-foreground rounded-lg p-4">
+                <div className="bg-primary/10 rounded-lg p-4">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-lg">Total Mensal:</span>
-                    <span className="text-3xl font-bold">
+                    <span className="text-lg font-medium">Total Mensal:</span>
+                    <span className="text-2xl font-bold text-primary">
                       R$ {calculateTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex justify-between">
+
+              <div className="flex justify-between mt-6">
                 <Button variant="outline" onClick={prevStep}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
                 </Button>
-                <Button onClick={handleConfirm} size="lg" className="px-8">
+                <Button onClick={handleConfirm} size="lg">
                   Confirmar Cadastro
                   <CheckCircle className="ml-2 h-5 w-5" />
                 </Button>
@@ -593,19 +585,15 @@ const PublicForm = () => {
               <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
               </div>
-              <h1 className="text-3xl font-bold mb-4">Obrigado!</h1>
+              <h1 className="text-3xl font-bold mb-4 text-green-600 dark:text-green-400">
+                Cadastro Realizado!
+              </h1>
               <p className="text-muted-foreground mb-2 text-lg">
-                Seu cadastro foi realizado com sucesso.
+                Obrigado por se cadastrar, {personalInfo.nome}!
               </p>
               <p className="text-muted-foreground mb-8">
-                Em breve entraremos em contato para confirmar seu plano.
+                Em breve entraremos em contato pelo WhatsApp para confirmar seus agendamentos.
               </p>
-              <div className="bg-muted/50 rounded-lg p-6 max-w-md mx-auto">
-                <p className="text-sm text-muted-foreground mb-2">Plano selecionado:</p>
-                <p className="text-2xl font-bold text-primary">
-                  R$ {calculateTotal().toFixed(2)}/mês
-                </p>
-              </div>
             </CardContent>
           </Card>
         )}

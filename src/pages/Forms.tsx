@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Search, FileText, Trash2, Eye, Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, FileText, Trash2, Eye, Copy, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,20 +22,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Form, Service } from '@/types';
+import { Form, Service, FormServiceOption } from '@/types';
+import { formsApi, servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function Forms() {
-  const [forms, setForms] = useLocalStorage<Form[]>('platai-forms', []);
-  const [services] = useLocalStorage<Service[]>('platai-services', []);
+  const [forms, setForms] = useState<Form[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  const handleCopyLink = async (formId: string) => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [formsData, servicesData] = await Promise.all([
+        formsApi.list(),
+        servicesApi.list()
+      ]);
+      setForms(formsData);
+      setServices(servicesData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyLink = async (formId: number) => {
     const baseUrl = window.location.origin;
     const publicUrl = `${baseUrl}/form/${formId}`;
     
@@ -49,21 +71,40 @@ export default function Forms() {
     }
   };
 
-  const handleSaveForm = (formData: Omit<Form, 'id' | 'createdAt'>) => {
-    const newForm: Form = {
-      ...formData,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    setForms(prev => [...prev, newForm]);
+  const handleSaveForm = async (formData: {
+    name: string;
+    description: string;
+    serviceOptions: FormServiceOption[];
+  }) => {
+    try {
+      await formsApi.create({
+        name: formData.name,
+        description: formData.description || undefined,
+        forms_options: formData.serviceOptions.map(opt => ({
+          id: opt.serviceId,
+          secondary_options: opt.secondaryServiceIds.map(id => ({ id })),
+        })),
+      });
+      toast.success('Formulário cadastrado com sucesso!');
+      loadData();
+    } catch (error) {
+      console.error('Error creating form:', error);
+      toast.error('Erro ao cadastrar formulário');
+    }
   };
 
-  const handleDeleteForm = (id: string) => {
-    setForms(prev => prev.filter(f => f.id !== id));
-    toast.success('Formulário excluído com sucesso!');
+  const handleDeleteForm = async (id: number) => {
+    try {
+      await formsApi.delete(id);
+      toast.success('Formulário excluído com sucesso!');
+      loadData();
+    } catch (error) {
+      console.error('Error deleting form:', error);
+      toast.error('Erro ao excluir formulário');
+    }
   };
 
-  const getServiceById = (id: string) => services.find(s => s.id === id);
+  const getServiceById = (id: number) => services.find(s => s.id === id);
 
   const filteredForms = forms.filter(form =>
     form.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,6 +115,14 @@ export default function Forms() {
     setSelectedForm(form);
     setIsDetailsOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
