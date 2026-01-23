@@ -4,72 +4,81 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { BookingModal } from "@/components/BookingModal";
-import { AppointmentCard, Appointment } from "@/components/AppointmentCard";
+import { AppointmentCard, Appointment, ServiceItem } from "@/components/AppointmentCard";
 import { AppointmentDetailsModal } from "@/components/AppointmentDetailsModal";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+// Mock services
+const mockServices: ServiceItem[] = [
+  { id: 1, name: "Corte Feminino", price: 8000, spent_time: 60, genre: "feminino" },
+  { id: 2, name: "Corte Masculino", price: 5000, spent_time: 30, genre: "masculino" },
+  { id: 3, name: "Coloração", price: 15000, spent_time: 120, genre: "feminino" },
+  { id: 4, name: "Barba", price: 3500, spent_time: 30, genre: "masculino" },
+  { id: 5, name: "Escova Progressiva", price: 20000, spent_time: 120, genre: "feminino" },
+];
+
 // Mock data with dates
 const today = new Date();
-const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+const weekStartDate = startOfWeek(today, { weekStartsOn: 0 });
 
 const mockAppointments: (Appointment & { date: Date })[] = [
   {
     id: "1",
     clientName: "Maria Silva",
-    service: "Corte Feminino",
+    services: [mockServices[0], mockServices[2]],
     startTime: "09:00",
-    endTime: "10:00",
-    duration: 60,
-    price: 80,
+    endTime: "11:00",
+    duration: 180,
+    price: 23000,
     phone: "(11) 99999-9999",
     notes: "Cliente preferencial, usar produtos específicos",
-    date: addDays(weekStart, 1), // Segunda
+    date: addDays(weekStartDate, 1),
   },
   {
     id: "2",
     clientName: "João Santos",
-    service: "Corte Masculino",
+    services: [mockServices[1], mockServices[3]],
     startTime: "10:30",
-    endTime: "11:00",
-    duration: 30,
-    price: 50,
+    endTime: "11:30",
+    duration: 60,
+    price: 8500,
     phone: "(11) 98888-8888",
-    date: addDays(weekStart, 1), // Segunda
+    date: addDays(weekStartDate, 1),
   },
   {
     id: "3",
     clientName: "Ana Costa",
-    service: "Coloração",
+    services: [mockServices[2]],
     startTime: "14:00",
     endTime: "16:00",
     duration: 120,
-    price: 150,
+    price: 15000,
     phone: "(11) 97777-7777",
     notes: "Primeira coloração, fazer teste de alergia",
-    date: addDays(weekStart, 3), // Quarta
+    date: addDays(weekStartDate, 3),
   },
   {
     id: "4",
     clientName: "Carlos Souza",
-    service: "Barba",
+    services: [mockServices[3]],
     startTime: "11:00",
     endTime: "11:30",
     duration: 30,
-    price: 35,
+    price: 3500,
     phone: "(11) 96666-6666",
-    date: addDays(weekStart, 2), // Terça
+    date: addDays(weekStartDate, 2),
   },
   {
     id: "5",
     clientName: "Paula Lima",
-    service: "Escova Progressiva",
+    services: [mockServices[4], mockServices[0]],
     startTime: "15:00",
-    endTime: "17:00",
-    duration: 120,
-    price: 200,
+    endTime: "18:00",
+    duration: 180,
+    price: 28000,
     phone: "(11) 95555-5555",
-    date: addDays(weekStart, 5), // Sexta
+    date: addDays(weekStartDate, 5),
   },
 ];
 
@@ -138,7 +147,6 @@ export default function Calendar() {
             {weekDays.map((day, index) => {
               const isToday = isSameDay(day, new Date());
               const isSelected = isSameDay(day, selectedDate);
-              const dayAppointments = mockAppointments; // In real app, filter by day
 
               return (
                 <Card
@@ -151,21 +159,21 @@ export default function Calendar() {
                     <div
                       className={`text-center p-2 rounded-lg ${
                         isToday
-                          ? "bg-primary text-primary-foreground"
+                          ? "border-2 border-primary"
                           : "text-foreground"
                       }`}
                     >
-                      <p className="text-xs font-medium uppercase">
+                      <p className={`text-xs font-medium uppercase ${isToday ? "text-primary" : ""}`}>
                         {format(day, "EEE", { locale: ptBR })}
                       </p>
-                      <p className="text-2xl font-bold">
+                      <p className={`text-2xl font-bold ${isToday ? "text-primary" : ""}`}>
                         {format(day, "dd")}
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    {dayAppointments
+                    {mockAppointments
                       .filter(appointment => isSameDay(appointment.date, day))
                       .map((appointment) => (
                         <AppointmentCard
