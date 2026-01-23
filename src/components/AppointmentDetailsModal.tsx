@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Appointment } from "./AppointmentCard";
-import { Clock, User, Phone, Scissors, FileText, DollarSign, Calendar as CalendarIcon } from "lucide-react";
+import { Clock, User, Phone, FileText, DollarSign, Calendar as CalendarIcon, Package } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface AppointmentDetailsModalProps {
   open: boolean;
@@ -47,10 +48,36 @@ export function AppointmentDetailsModal({
             <Separator />
 
             <div className="flex items-start gap-3">
-              <Scissors className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Serviço</p>
-                <p className="text-base font-medium">{appointment.service}</p>
+              <Package className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Serviços ({appointment.services?.length || 0})
+                </p>
+                <div className="space-y-2">
+                  {appointment.services?.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">{service.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {service.spent_time} min
+                          </Badge>
+                          {service.genre && (
+                            <Badge variant="outline" className="text-xs">
+                              {service.genre}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <p className="font-semibold text-primary">
+                        R$ {(service.price / 100).toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -79,8 +106,10 @@ export function AppointmentDetailsModal({
             <div className="flex items-start gap-3">
               <DollarSign className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Valor</p>
-                <p className="text-xl font-bold text-primary">R$ {appointment.price}</p>
+                <p className="text-sm font-medium text-muted-foreground">Valor Total</p>
+                <p className="text-xl font-bold text-primary">
+                  R$ {(appointment.price / 100).toFixed(2).replace('.', ',')}
+                </p>
               </div>
             </div>
 
