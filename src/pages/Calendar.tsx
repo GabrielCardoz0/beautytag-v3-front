@@ -96,97 +96,117 @@ export default function Calendar() {
     setIsDetailsModalOpen(true);
   };
 
+  const appointmentsForSelectedDate = mockAppointments.filter(a => 
+    isSameDay(a.date, selectedDate)
+  );
+
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar with mini calendar */}
-      <div className="w-80 border-r border-border p-6 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold mb-4 text-foreground">Calendário</h2>
-          <CalendarComponent
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => date && setSelectedDate(date)}
-            locale={ptBR}
-            className="rounded-md border shadow-sm pointer-events-auto"
-          />
-        </div>
+    <div className="flex flex-col h-screen bg-background overflow-auto">
+      {/* Header com calendário e resumo */}
+      <div className="border-b border-border p-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Mini calendário */}
+          <div className="flex-shrink-0">
+            <h2 className="text-2xl font-bold mb-4 text-foreground">Calendário</h2>
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
+              locale={ptBR}
+              className="rounded-md border shadow-sm pointer-events-auto"
+            />
+          </div>
 
-        <Button
-          onClick={() => setIsBookingModalOpen(true)}
-          className="w-full gap-2"
-          size="lg"
-        >
-          <Plus className="h-5 w-5" />
-          Nova Reserva
-        </Button>
+          {/* Resumo e ações */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </h1>
+              <p className="text-muted-foreground">
+                {appointmentsForSelectedDate.length} agendamento(s) para este dia
+              </p>
+            </div>
+            
+            <div className="flex gap-4 mt-4">
+              <Button
+                onClick={() => setIsBookingModalOpen(true)}
+                size="lg"
+                className="gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Nova Reserva
+              </Button>
+            </div>
+          </div>
 
-        <div className="pt-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-            Semana de {format(startOfWeek(selectedDate, { weekStartsOn: 0 }), "dd/MM", { locale: ptBR })}
-          </h3>
-          <p className="text-2xl font-bold text-foreground">
-            {mockAppointments.filter(a => {
-              const weekS = startOfWeek(selectedDate, { weekStartsOn: 0 });
-              return a.date >= weekS && a.date < addDays(weekS, 7);
-            }).length} agendamentos
-          </p>
+          {/* Estatísticas da semana */}
+          <div className="flex-shrink-0 p-4 rounded-lg border bg-muted/30">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+              Semana de {format(weekStart, "dd/MM", { locale: ptBR })}
+            </h3>
+            <p className="text-3xl font-bold text-foreground">
+              {mockAppointments.filter(a => {
+                return a.date >= weekStart && a.date < addDays(weekStart, 7);
+              }).length}
+            </p>
+            <p className="text-sm text-muted-foreground">agendamentos</p>
+          </div>
         </div>
       </div>
 
-      {/* Main calendar view */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground">
-              {format(weekStart, "MMMM yyyy", { locale: ptBR })}
-            </h1>
-          </div>
+      {/* Visão semanal - colunas lado a lado com scroll horizontal */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="flex gap-4 min-w-max">
+          {weekDays.map((day, index) => {
+            const isToday = isSameDay(day, new Date());
+            const isSelected = isSameDay(day, selectedDate);
+            const dayAppointments = mockAppointments.filter(a => isSameDay(a.date, day));
 
-          {/* Week view */}
-          <div className="grid grid-cols-7 gap-4">
-            {weekDays.map((day, index) => {
-              const isToday = isSameDay(day, new Date());
-              const isSelected = isSameDay(day, selectedDate);
-
-              return (
-                <Card
-                  key={index}
-                  className={`p-4 min-h-[500px] ${
-                    isSelected ? "ring-2 ring-primary" : ""
-                  }`}
-                >
-                  <div className="mb-4">
-                    <div
-                      className={`text-center p-2 rounded-lg ${
-                        isToday
-                          ? "border-2 border-primary"
-                          : "text-foreground"
-                      }`}
-                    >
-                      <p className={`text-xs font-medium uppercase ${isToday ? "text-primary" : ""}`}>
-                        {format(day, "EEE", { locale: ptBR })}
-                      </p>
-                      <p className={`text-2xl font-bold ${isToday ? "text-primary" : ""}`}>
-                        {format(day, "dd")}
-                      </p>
-                    </div>
+            return (
+              <Card
+                key={index}
+                className={`w-64 flex-shrink-0 cursor-pointer transition-all ${
+                  isSelected ? "ring-2 ring-primary" : ""
+                } ${isToday ? "border-primary" : ""}`}
+                onClick={() => setSelectedDate(day)}
+              >
+                <div className="p-4 border-b">
+                  <div
+                    className={`text-center p-2 rounded-lg ${
+                      isToday ? "bg-primary/10" : ""
+                    }`}
+                  >
+                    <p className={`text-xs font-medium uppercase ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                      {format(day, "EEE", { locale: ptBR })}
+                    </p>
+                    <p className={`text-2xl font-bold ${isToday ? "text-primary" : "text-foreground"}`}>
+                      {format(day, "dd")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {dayAppointments.length} agendamento(s)
+                    </p>
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    {mockAppointments
-                      .filter(appointment => isSameDay(appointment.date, day))
-                      .map((appointment) => (
-                        <AppointmentCard
-                          key={appointment.id}
-                          appointment={appointment}
-                          onClick={() => handleAppointmentClick(appointment)}
-                        />
-                      ))}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                <div className="p-3 space-y-2 max-h-[400px] overflow-y-auto">
+                  {dayAppointments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Sem agendamentos
+                    </p>
+                  ) : (
+                    dayAppointments.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                        onClick={() => handleAppointmentClick(appointment)}
+                      />
+                    ))
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
