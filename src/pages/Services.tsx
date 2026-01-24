@@ -166,7 +166,7 @@ export default function Services() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3 max-w-3xl">
           {filteredServices.map(service => (
             <Card 
               key={service.id} 
@@ -174,34 +174,35 @@ export default function Services() {
               onClick={() => handleServiceClick(service)}
             >
               <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Scissors className="h-5 w-5 text-primary" />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Scissors className="h-6 w-6 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{service.name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-foreground truncate">{service.name}</h3>
+                        <Badge className={getGenderColor(service.gender)}>
+                          {service.gender}
+                        </Badge>
+                      </div>
+                      {service.description && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {service.description}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">{service.spentTime} min</p>
                     </div>
                   </div>
-                  <Badge className={getGenderColor(service.gender)}>
-                    {service.gender}
-                  </Badge>
-                </div>
-                
-                {service.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {service.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between pt-3 border-t">
-                  <span className="text-2xl font-bold text-foreground">
-                    R$ {service.price.toFixed(2)}
-                  </span>
-                  <div className="text-right text-xs text-muted-foreground">
-                    <p>Repasse: {service.repassePercent}%</p>
-                    <p>Colaborador: {service.colaboradorPercent}%</p>
+                  
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <div className="text-right text-xs text-muted-foreground">
+                      <p>Repasse: {service.repassePercent}%</p>
+                      <p>Colaborador: {service.colaboradorPercent}%</p>
+                    </div>
+                    <span className="text-2xl font-bold text-foreground whitespace-nowrap">
+                      R$ {service.price.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </CardContent>

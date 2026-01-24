@@ -161,23 +161,29 @@ export default function Forms() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3 max-w-3xl">
           {filteredForms.map(form => (
             <Card key={form.id} className="hover:border-primary/50 transition-colors">
               <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <FileText className="h-5 w-5 text-primary" />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-6 w-6 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{form.name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">{form.name}</h3>
+                      {form.description && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {form.description}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {form.serviceOptions.length} serviço(s)
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -222,29 +228,6 @@ export default function Forms() {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
-                </div>
-                
-                {form.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {form.description}
-                  </p>
-                )}
-
-                <div className="pt-3 border-t space-y-2">
-                  {form.serviceOptions.slice(0, 3).map((option, idx) => {
-                    const service = getServiceById(option.serviceId);
-                    return service ? (
-                      <div key={idx} className="flex items-center justify-between text-sm">
-                        <span className="truncate font-medium">{service.name}</span>
-                        <span className="text-muted-foreground">R$ {service.price.toFixed(2)}</span>
-                      </div>
-                    ) : null;
-                  })}
-                  {form.serviceOptions.length > 3 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{form.serviceOptions.length - 3} mais serviço(s)
-                    </p>
-                  )}
                 </div>
               </CardContent>
             </Card>
