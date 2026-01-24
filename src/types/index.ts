@@ -49,11 +49,27 @@ export interface Service {
   createdAt: string;
 }
 
+export interface UserMetadata {
+  cnpj?: string;
+  cpf?: string;
+  empresa?: string;
+  birthday?: string;
+  genre?: string;
+  whatsapp?: string;
+  cep?: string;
+  [key: string]: string | undefined;
+}
+
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   role: UserRole;
+  metadata: UserMetadata | null;
+  confirmed?: boolean;
+  blocked?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Tipo da API para opções de formulário
