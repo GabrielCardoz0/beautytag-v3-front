@@ -18,17 +18,19 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const success = login(email, password);
-    if (success) {
-      toast.success('Login realizado com sucesso!');
-      navigate('/calendar');
-    } else {
-      toast.error('Email ou senha incorretos');
+    try {
+      const success = await login(email, password);
+      if (success) {
+        toast.success('Login realizado com sucesso!');
+        navigate('/calendar');
+      } else {
+        toast.error('Email ou senha incorretos');
+      }
+    } catch (error) {
+      toast.error('Erro ao conectar com o servidor');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

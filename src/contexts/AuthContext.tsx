@@ -1,19 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole } from '@/types';
+import axios from 'axios';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const MOCK_USERS = [
-  { id: '1', name: 'João Silva', email: 'joao@example.com', password: '123456', role: 'admin' as UserRole },
-  { id: '2', name: 'Maria Santos', email: 'maria@example.com', password: '123456', role: 'partner' as UserRole },
-];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -29,18 +25,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const login = (email: string, password: string): boolean => {
-    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await axios.post<{ token: string }>('http://localhost:4000/auth/login', {
+        email,
+        password,
+      });
+
+      const { token } = response.data;
+      
+      // Armazenar token para uso nas requisições autenticadas
+      localStorage.setItem('platai-token', token);
+      
+      // Criar usuário a partir do email (em produção, a API retornaria dados do usuário)
+      const userFromEmail: User = {
+        id: crypto.randomUUID(),
+        name: email.split('@')[0],
+        email,
+        role: email.includes('admin') ? 'admin' : 'partner' as UserRole,
+      };
+      
+      setUser(userFromEmail);
       return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('platai-token');
   };
 
   return (
