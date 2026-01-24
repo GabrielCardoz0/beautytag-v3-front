@@ -32,6 +32,7 @@ const PublicForm = () => {
   const [form, setForm] = useState<Form | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -126,10 +127,35 @@ const PublicForm = () => {
     }, 0);
   };
 
-  const handleConfirm = () => {
-    // Here you would send the data to the API
-    console.log('Submitting:', { personalInfo, serviceSelections, formId });
-    setCurrentStep(6);
+  const handleConfirm = async () => {
+    setSubmitting(true);
+    
+    try {
+      const payload = {
+        name: personalInfo.nome,
+        email: personalInfo.email,
+        metadata: {
+          cpf: personalInfo.cpf,
+          empresa: personalInfo.empresa || '',
+          birthday: new Date(personalInfo.dataNascimento).toISOString(),
+          genre: personalInfo.genero,
+          whatsapp: personalInfo.whatsapp,
+          cep: personalInfo.cep,
+        },
+        plan_services: serviceSelections.map(sel => ({
+          id: sel.serviceId,
+          frequency: sel.frequency,
+        })),
+      };
+
+      await axios.post('http://localhost:4000/plans', payload);
+      setCurrentStep(6);
+    } catch (error) {
+      console.error('Error submitting plan:', error);
+      alert('Erro ao enviar cadastro. Por favor, tente novamente.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const nextStep = () => setCurrentStep(prev => prev + 1);
@@ -569,8 +595,8 @@ const PublicForm = () => {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
                 </Button>
-                <Button onClick={handleConfirm} size="lg">
-                  Confirmar Cadastro
+                <Button onClick={handleConfirm} size="lg" disabled={submitting}>
+                  {submitting ? 'Enviando...' : 'Confirmar Cadastro'}
                   <CheckCircle className="ml-2 h-5 w-5" />
                 </Button>
               </div>
