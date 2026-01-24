@@ -2,6 +2,20 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, UserRole } from '@/types';
 import axios from 'axios';
 
+interface ApiUserResponse {
+  user: {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    email: string;
+    confirmed: boolean;
+    blocked: boolean;
+    role: UserRole;
+    metadata: Record<string, string> | null;
+  };
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -27,28 +41,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await axios.post<{ token: string }>('http://localhost:4000/auth/login', {
+      // 1. Fazer login e obter token
+      const loginResponse = await axios.post<{ token: string }>('http://localhost:4000/auth/login', {
         email,
         password,
       });
 
-      const { token } = response.data;
-      
-      // Armazenar token para uso nas requisições autenticadas
+      const { token } = loginResponse.data;
       localStorage.setItem('platai-token', token);
+
+      // 2. Buscar dados completos do usuário
+      const userResponse = await axios.get<ApiUserResponse>('http://localhost:4000/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const apiUser = userResponse.data.user;
       
-      // Criar usuário a partir do email (em produção, a API retornaria dados do usuário)
-      const userFromEmail: User = {
-        id: crypto.randomUUID(),
-        name: email.split('@')[0],
-        email,
-        role: email.includes('admin') ? 'admin' : 'partner' as UserRole,
+      // 3. Converter para o formato interno
+      const userData: User = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        role: apiUser.role,
+        metadata: apiUser.metadata,
+        confirmed: apiUser.confirmed,
+        blocked: apiUser.blocked,
+        created_at: apiUser.created_at,
+        updated_at: apiUser.updated_at,
       };
       
-      setUser(userFromEmail);
+      setUser(userData);
       return true;
     } catch (error) {
       console.error('Login error:', error);
+      localStorage.removeItem('platai-token');
       return false;
     }
   };
