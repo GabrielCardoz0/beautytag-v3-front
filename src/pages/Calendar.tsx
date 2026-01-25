@@ -101,136 +101,132 @@ export default function Calendar() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header: Calendário + Resumo */}
-      <div className="border-b border-border p-6 bg-card">
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          {/* Mini calendário */}
-          <div className="flex-shrink-0">
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              locale={ptBR}
-              className="rounded-md border shadow-sm pointer-events-auto bg-background"
-            />
-          </div>
+    <div className="flex h-screen bg-background">
+      {/* Sidebar: Calendário + Resumo */}
+      <div className="w-80 flex-shrink-0 border-r border-border p-6 bg-card flex flex-col">
+        <CalendarComponent
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => date && setSelectedDate(date)}
+          locale={ptBR}
+          className="rounded-md border shadow-sm pointer-events-auto bg-background mb-6"
+        />
 
-          {/* Info do dia selecionado */}
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground capitalize mb-1">
-              {format(selectedDate, "EEEE", { locale: ptBR })}
-            </h1>
-            <p className="text-4xl font-bold text-primary mb-1">
-              {format(selectedDate, "dd")}
-            </p>
-            <p className="text-muted-foreground mb-4">
-              {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-sm">
-                <span className="text-2xl font-bold text-foreground">{appointmentsForSelectedDate.length}</span>
-                <span className="text-muted-foreground ml-2">agendamento(s) neste dia</span>
-              </div>
-            </div>
-            
-            <Button
-              onClick={() => setIsBookingModalOpen(true)}
-              className="mt-4 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Nova Reserva
-            </Button>
+        {/* Info do dia selecionado */}
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-foreground capitalize mb-1">
+            {format(selectedDate, "EEEE", { locale: ptBR })}
+          </h1>
+          <p className="text-3xl font-bold text-primary mb-1">
+            {format(selectedDate, "dd")}
+          </p>
+          <p className="text-muted-foreground text-sm mb-4">
+            {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
+          </p>
+          
+          <div className="text-sm mb-4">
+            <span className="text-xl font-bold text-foreground">{appointmentsForSelectedDate.length}</span>
+            <span className="text-muted-foreground ml-2">agendamento(s)</span>
           </div>
+          
+          <Button
+            onClick={() => setIsBookingModalOpen(true)}
+            className="w-full gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Reserva
+          </Button>
         </div>
       </div>
 
-      {/* Tabs dos dias da semana */}
-      <div className="border-b border-border bg-muted/30">
-        <div className="flex overflow-x-auto">
-          {weekDays.map((day, index) => {
-            const isToday = isSameDay(day, new Date());
-            const isSelected = isSameDay(day, selectedDate);
-            const dayAppointments = mockAppointments.filter(a => isSameDay(a.date, day));
+      {/* Área principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Tabs dos dias da semana */}
+        <div className="border-b border-border bg-muted/30">
+          <div className="flex overflow-x-auto">
+            {weekDays.map((day, index) => {
+              const isToday = isSameDay(day, new Date());
+              const isSelected = isSameDay(day, selectedDate);
+              const dayAppointments = mockAppointments.filter(a => isSameDay(a.date, day));
 
-            return (
-              <button
-                key={index}
-                onClick={() => setSelectedDate(day)}
-                className={`flex-1 min-w-[100px] px-4 py-3 text-center transition-all border-b-2 ${
-                  isSelected 
-                    ? "border-primary bg-background" 
-                    : "border-transparent hover:bg-muted/50"
-                }`}
-              >
-                <p className={`text-xs font-medium uppercase ${
-                  isToday ? "text-primary" : "text-muted-foreground"
-                }`}>
-                  {format(day, "EEE", { locale: ptBR })}
-                </p>
-                <p className={`text-lg font-bold ${
-                  isSelected ? "text-primary" : isToday ? "text-primary" : "text-foreground"
-                }`}>
-                  {format(day, "dd")}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {dayAppointments.length > 0 ? `${dayAppointments.length} agend.` : "-"}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Lista de agendamentos do dia selecionado */}
-      <div className="flex-1 overflow-auto p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
-          Agendamentos de {format(selectedDate, "dd/MM", { locale: ptBR })}
-        </h2>
-        
-        {appointmentsForSelectedDate.length === 0 ? (
-          <Card className="border-dashed">
-            <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">Nenhum agendamento para este dia</p>
-              <Button onClick={() => setIsBookingModalOpen(true)} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Agendamento
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          <div className="space-y-3 max-w-2xl">
-            {appointmentsForSelectedDate
-              .sort((a, b) => a.startTime.localeCompare(b.startTime))
-              .map((appointment) => (
-                <Card 
-                  key={appointment.id} 
-                  className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => handleAppointmentClick(appointment)}
+              return (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDate(day)}
+                  className={`flex-1 min-w-[100px] px-4 py-3 text-center transition-all border-b-2 ${
+                    isSelected 
+                      ? "border-primary bg-background" 
+                      : "border-transparent hover:bg-muted/50"
+                  }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-center flex-shrink-0 w-16">
-                      <p className="text-lg font-bold text-primary">{appointment.startTime}</p>
-                      <p className="text-xs text-muted-foreground">{appointment.endTime}</p>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">{appointment.clientName}</h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {appointment.services.map(s => s.name).join(", ")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{appointment.duration} min</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-lg font-bold text-foreground">
-                        R$ {(appointment.price / 100).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  <p className={`text-xs font-medium uppercase ${
+                    isToday ? "text-primary" : "text-muted-foreground"
+                  }`}>
+                    {format(day, "EEE", { locale: ptBR })}
+                  </p>
+                  <p className={`text-lg font-bold ${
+                    isSelected ? "text-primary" : isToday ? "text-primary" : "text-foreground"
+                  }`}>
+                    {format(day, "dd")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {dayAppointments.length > 0 ? `${dayAppointments.length} agend.` : "-"}
+                  </p>
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* Lista de agendamentos do dia selecionado */}
+        <div className="flex-1 overflow-auto p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Agendamentos de {format(selectedDate, "dd/MM", { locale: ptBR })}
+          </h2>
+          
+          {appointmentsForSelectedDate.length === 0 ? (
+            <Card className="border-dashed">
+              <div className="flex flex-col items-center justify-center py-12">
+                <p className="text-muted-foreground mb-4">Nenhum agendamento para este dia</p>
+                <Button onClick={() => setIsBookingModalOpen(true)} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Agendamento
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-3 max-w-2xl">
+              {appointmentsForSelectedDate
+                .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                .map((appointment) => (
+                  <Card 
+                    key={appointment.id} 
+                    className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => handleAppointmentClick(appointment)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-center flex-shrink-0 w-16">
+                        <p className="text-lg font-bold text-primary">{appointment.startTime}</p>
+                        <p className="text-xs text-muted-foreground">{appointment.endTime}</p>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">{appointment.clientName}</h3>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {appointment.services.map(s => s.name).join(", ")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{appointment.duration} min</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-lg font-bold text-foreground">
+                          R$ {(appointment.price / 100).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <BookingModal
