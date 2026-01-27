@@ -4,6 +4,7 @@ import { Plus, Search, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PartnerModal } from '@/components/PartnerModal';
 import { partnersApi } from '@/lib/api';
 import { Partner } from '@/types';
@@ -65,16 +66,16 @@ export default function Partners() {
 
   if (isLoading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 md:p-8 flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Parceiros</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Parceiros</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Parceiro
@@ -87,7 +88,7 @@ export default function Partners() {
           placeholder="Buscar por nome, email ou CNPJ..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 max-w-md"
+          className="pl-10 w-full md:max-w-md"
         />
       </div>
 
@@ -108,33 +109,90 @@ export default function Partners() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col gap-3 max-w-3xl">
-          {filteredPartners.map(partner => (
-            <Card
-              key={partner.id}
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate(`/partners/${partner.id}`)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-bold text-2xl">
-                      {partner.name.charAt(0).toUpperCase()}
-                    </span>
+        <>
+          {/* Desktop: Table layout */}
+          <div className="hidden md:block border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Parceiro</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">WhatsApp</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">CNPJ</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Cidade</th>
+                  <th className="text-center p-4 font-medium text-muted-foreground">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filteredPartners.map(partner => (
+                  <tr 
+                    key={partner.id} 
+                    className="hover:bg-muted/30 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/partners/${partner.id}`)}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">
+                            {partner.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{partner.name}</p>
+                          <p className="text-sm text-muted-foreground">{partner.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 text-muted-foreground">{partner.whatsapp || '-'}</td>
+                    <td className="p-4 text-muted-foreground">{partner.cnpj || '-'}</td>
+                    <td className="p-4 text-muted-foreground">
+                      {partner.city ? `${partner.city}${partner.state ? ` - ${partner.state}` : ''}` : '-'}
+                    </td>
+                    <td className="p-4 text-center">
+                      <Badge variant={partner.confirmed ? 'default' : 'secondary'}>
+                        {partner.confirmed ? 'Confirmado' : 'Pendente'}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: Card layout */}
+          <div className="md:hidden flex flex-col gap-3">
+            {filteredPartners.map(partner => (
+              <Card
+                key={partner.id}
+                className="cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => navigate(`/partners/${partner.id}`)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-bold text-xl">
+                        {partner.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-semibold text-foreground truncate">{partner.name}</p>
+                        <Badge variant={partner.confirmed ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
+                          {partner.confirmed ? 'Confirmado' : 'Pendente'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">{partner.email}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        {partner.whatsapp && <span>{partner.whatsapp}</span>}
+                        {partner.whatsapp && partner.city && <span>•</span>}
+                        {partner.city && <span>{partner.city}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-lg">{partner.name}</h3>
-                    <p className="text-sm text-muted-foreground">{partner.email}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm text-foreground">{partner.whatsapp}</p>
-                    <p className="text-xs text-muted-foreground">{partner.cnpj}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       <PartnerModal

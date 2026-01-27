@@ -118,14 +118,30 @@ export const servicesApi = {
     price: number; // em reais
     genre: string;
     spent_time: number;
+    user_id?: number;
+    percent_colab?: number;
+    percent_repasse?: number;
+    preco_parceiro?: number;
+    preco_colab?: number;
+    lucro?: number;
   }): Promise<Service> => {
-    const response = await api.post<{ service: ApiService }>('/services', {
+    const payload: any = {
       name: data.name,
       description: data.description,
       price: Math.round(data.price * 100), // converte reais para centavos
       genre: data.genre,
       spent_time: data.spent_time,
-    });
+    };
+    
+    // Campos adicionais para admin
+    if (data.user_id !== undefined) payload.user_id = data.user_id;
+    if (data.percent_colab !== undefined) payload.percent_colab = data.percent_colab;
+    if (data.percent_repasse !== undefined) payload.percent_repasse = data.percent_repasse;
+    if (data.preco_parceiro !== undefined) payload.preco_parceiro = Math.round(data.preco_parceiro * 100);
+    if (data.preco_colab !== undefined) payload.preco_colab = Math.round(data.preco_colab * 100);
+    if (data.lucro !== undefined) payload.lucro = Math.round(data.lucro * 100);
+    
+    const response = await api.post<{ service: ApiService }>('/services', payload);
     return apiServiceToService(response.data.service);
   },
   

@@ -42,6 +42,12 @@ export default function Services() {
     price: number;
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
+    user_id?: number;
+    percent_colab?: number;
+    percent_repasse?: number;
+    preco_parceiro?: number;
+    preco_colab?: number;
+    lucro?: number;
   }) => {
     try {
       await servicesApi.create({
@@ -50,6 +56,12 @@ export default function Services() {
         price: serviceData.price,
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
+        user_id: serviceData.user_id,
+        percent_colab: serviceData.percent_colab,
+        percent_repasse: serviceData.percent_repasse,
+        preco_parceiro: serviceData.preco_parceiro,
+        preco_colab: serviceData.preco_colab,
+        lucro: serviceData.lucro,
       });
       toast.success('Serviço cadastrado com sucesso!');
       loadServices();
@@ -114,25 +126,25 @@ export default function Services() {
 
   const getGenderColor = (gender: string) => {
     switch (gender) {
-      case 'masculino': return 'bg-blue-100 text-blue-800';
-      case 'feminino': return 'bg-pink-100 text-pink-800';
-      case 'unissex': return 'bg-purple-100 text-purple-800';
+      case 'masculino': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'feminino': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
+      case 'unissex': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       default: return '';
     }
   };
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 md:p-8 flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Serviços</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Serviços</h1>
         <Button onClick={() => { setEditingService(null); setIsModalOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Serviço
@@ -145,7 +157,7 @@ export default function Services() {
           placeholder="Buscar por nome ou descrição..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 max-w-md"
+          className="pl-10 w-full md:max-w-md"
         />
       </div>
 
@@ -166,49 +178,97 @@ export default function Services() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col gap-3 max-w-3xl">
-          {filteredServices.map(service => (
-            <Card 
-              key={service.id} 
-              className="hover:border-primary/50 transition-colors cursor-pointer"
-              onClick={() => handleServiceClick(service)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Scissors className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground truncate">{service.name}</h3>
-                        <Badge className={getGenderColor(service.gender)}>
-                          {service.gender}
-                        </Badge>
+        <>
+          {/* Desktop: Table layout */}
+          <div className="hidden md:block border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Serviço</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Gênero</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Duração</th>
+                  <th className="text-right p-4 font-medium text-muted-foreground">Repasse</th>
+                  <th className="text-right p-4 font-medium text-muted-foreground">Colaborador</th>
+                  <th className="text-right p-4 font-medium text-muted-foreground">Preço</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filteredServices.map(service => (
+                  <tr 
+                    key={service.id} 
+                    className="hover:bg-muted/30 cursor-pointer transition-colors"
+                    onClick={() => handleServiceClick(service)}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Scissors className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{service.name}</p>
+                          {service.description && (
+                            <p className="text-sm text-muted-foreground truncate max-w-xs">
+                              {service.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      {service.description && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {service.description}
-                        </p>
-                      )}
-                      <p className="text-sm text-muted-foreground">{service.spentTime} min</p>
+                    </td>
+                    <td className="p-4">
+                      <Badge className={getGenderColor(service.gender)}>
+                        {service.gender}
+                      </Badge>
+                    </td>
+                    <td className="p-4 text-muted-foreground">{service.spentTime} min</td>
+                    <td className="p-4 text-right text-muted-foreground">{service.repassePercent}%</td>
+                    <td className="p-4 text-right text-muted-foreground">{service.colaboradorPercent}%</td>
+                    <td className="p-4 text-right">
+                      <span className="font-bold text-foreground">
+                        R$ {service.price.toFixed(2)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: Card layout */}
+          <div className="md:hidden flex flex-col gap-3">
+            {filteredServices.map(service => (
+              <Card 
+                key={service.id} 
+                className="hover:border-primary/50 transition-colors cursor-pointer"
+                onClick={() => handleServiceClick(service)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Scissors className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">{service.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge className={`${getGenderColor(service.gender)} text-xs`}>
+                            {service.gender}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{service.spentTime} min</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-foreground">R$ {service.price.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Rep: {service.repassePercent}% | Col: {service.colaboradorPercent}%
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-6 flex-shrink-0">
-                    <div className="text-right text-xs text-muted-foreground">
-                      <p>Repasse: {service.repassePercent}%</p>
-                      <p>Colaborador: {service.colaboradorPercent}%</p>
-                    </div>
-                    <span className="text-2xl font-bold text-foreground whitespace-nowrap">
-                      R$ {service.price.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       <ServiceModal
