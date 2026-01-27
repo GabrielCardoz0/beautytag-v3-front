@@ -1,10 +1,37 @@
-export type UserRole = 'admin' | 'partner';
+export type UserRole = 'admin' | 'partner' | 'parceiro';
 
-export interface Partner {
-  id: string;
+// Tipo da API para metadata do parceiro
+export interface ApiPartnerMetadata {
+  cnpj?: string;
+  whatsapp?: string;
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+}
+
+// Tipo da API para parceiro (usuário com role parceiro)
+export interface ApiPartner {
+  id: number;
+  created_at: string;
+  updated_at: string;
   name: string;
   email: string;
-  phone: string;
+  confirmed: boolean;
+  blocked: boolean;
+  role: 'parceiro';
+  metadata: ApiPartnerMetadata | null;
+  services: ApiService[];
+}
+
+// Tipo usado internamente para parceiro
+export interface Partner {
+  id: number;
+  name: string;
+  email: string;
+  whatsapp: string;
   cnpj: string;
   cep: string;
   street: string;
@@ -12,6 +39,9 @@ export interface Partner {
   neighborhood: string;
   city: string;
   state: string;
+  confirmed: boolean;
+  blocked: boolean;
+  services: Service[];
   createdAt: string;
 }
 
@@ -142,5 +172,25 @@ export function apiFormToForm(apiForm: ApiForm): Form {
       secondaryServiceIds: opt.forms_options_secondary_options.map(s => s.id),
     })),
     createdAt: apiForm.created_at,
+  };
+}
+
+export function apiPartnerToPartner(apiPartner: ApiPartner): Partner {
+  return {
+    id: apiPartner.id,
+    name: apiPartner.name,
+    email: apiPartner.email,
+    whatsapp: apiPartner.metadata?.whatsapp || '',
+    cnpj: apiPartner.metadata?.cnpj || '',
+    cep: apiPartner.metadata?.cep || '',
+    street: apiPartner.metadata?.rua || '',
+    number: apiPartner.metadata?.numero || '',
+    neighborhood: apiPartner.metadata?.bairro || '',
+    city: apiPartner.metadata?.cidade || '',
+    state: apiPartner.metadata?.estado || '',
+    confirmed: apiPartner.confirmed,
+    blocked: apiPartner.blocked,
+    services: apiPartner.services.map(apiServiceToService),
+    createdAt: apiPartner.created_at,
   };
 }

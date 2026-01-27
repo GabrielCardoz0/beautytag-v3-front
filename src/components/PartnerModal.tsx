@@ -3,27 +3,39 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Partner } from '@/types';
 import { toast } from 'sonner';
 
 interface PartnerModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (partner: Omit<Partner, 'id' | 'createdAt'>) => void;
+  onSave: (partner: {
+    name: string;
+    email: string;
+    metadata: {
+      cnpj: string;
+      whatsapp: string;
+      cep: string;
+      rua: string;
+      numero: string;
+      bairro: string;
+      cidade: string;
+      estado: string;
+    };
+  }) => void;
 }
 
 export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
+    whatsapp: '',
     cnpj: '',
     cep: '',
-    street: '',
-    number: '',
-    neighborhood: '',
-    city: '',
-    state: '',
+    rua: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
   });
 
   const handleChange = (field: string, value: string) => {
@@ -57,26 +69,39 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.phone || !formData.cnpj) {
+    if (!formData.name || !formData.email || !formData.whatsapp || !formData.cnpj) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
-    onSave(formData);
+    onSave({
+      name: formData.name,
+      email: formData.email,
+      metadata: {
+        cnpj: formData.cnpj,
+        whatsapp: formData.whatsapp,
+        cep: formData.cep,
+        rua: formData.rua,
+        numero: formData.numero,
+        bairro: formData.bairro,
+        cidade: formData.cidade,
+        estado: formData.estado,
+      },
+    });
+    
     setFormData({
       name: '',
       email: '',
-      phone: '',
+      whatsapp: '',
       cnpj: '',
       cep: '',
-      street: '',
-      number: '',
-      neighborhood: '',
-      city: '',
-      state: '',
+      rua: '',
+      numero: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
     });
     onOpenChange(false);
-    toast.success('Parceiro cadastrado com sucesso!');
   };
 
   return (
@@ -110,11 +135,11 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone *</Label>
+                <Label htmlFor="whatsapp">WhatsApp *</Label>
                 <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => handleChange('phone', formatPhone(e.target.value))}
+                  id="whatsapp"
+                  value={formData.whatsapp}
+                  onChange={(e) => handleChange('whatsapp', formatPhone(e.target.value))}
                   placeholder="(11)99470-3376"
                 />
               </div>
@@ -143,47 +168,47 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="street">Rua</Label>
+                <Label htmlFor="rua">Rua</Label>
                 <Input
-                  id="street"
-                  value={formData.street}
-                  onChange={(e) => handleChange('street', e.target.value)}
+                  id="rua"
+                  value={formData.rua}
+                  onChange={(e) => handleChange('rua', e.target.value)}
                   placeholder="Rua Cabrália"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="number">Número</Label>
+                <Label htmlFor="numero">Número</Label>
                 <Input
-                  id="number"
-                  value={formData.number}
-                  onChange={(e) => handleChange('number', e.target.value)}
+                  id="numero"
+                  value={formData.numero}
+                  onChange={(e) => handleChange('numero', e.target.value)}
                   placeholder="135"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="neighborhood">Bairro</Label>
+                <Label htmlFor="bairro">Bairro</Label>
                 <Input
-                  id="neighborhood"
-                  value={formData.neighborhood}
-                  onChange={(e) => handleChange('neighborhood', e.target.value)}
+                  id="bairro"
+                  value={formData.bairro}
+                  onChange={(e) => handleChange('bairro', e.target.value)}
                   placeholder="Jardim Araruama"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="city">Cidade</Label>
+                <Label htmlFor="cidade">Cidade</Label>
                 <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleChange('city', e.target.value)}
+                  id="cidade"
+                  value={formData.cidade}
+                  onChange={(e) => handleChange('cidade', e.target.value)}
                   placeholder="Cotia"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="state">Estado</Label>
+                <Label htmlFor="estado">Estado</Label>
                 <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => handleChange('state', e.target.value.toUpperCase())}
+                  id="estado"
+                  value={formData.estado}
+                  onChange={(e) => handleChange('estado', e.target.value.toUpperCase())}
                   placeholder="SP"
                   maxLength={2}
                 />

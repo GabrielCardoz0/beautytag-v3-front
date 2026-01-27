@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, MapPin, Scissors, Pencil, Trash2, Save, X } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Scissors, Pencil, Trash2, Save, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,58 +17,156 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { partnersApi } from '@/lib/api';
 import { Partner } from '@/types';
 import { toast } from 'sonner';
+
+interface EditData {
+  name: string;
+  email: string;
+  whatsapp: string;
+  cnpj: string;
+  cep: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
 
 export default function PartnerDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [partners, setPartners] = useLocalStorage<Partner[]>('platai-partners', []);
+  const [partner, setPartner] = useState<Partner | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<Partner | null>(null);
+  const [editData, setEditData] = useState<EditData | null>(null);
 
-  const partner = partners.find(p => p.id === id);
+  const loadPartner = async () => {
+    if (!id) return;
+    try {
+      setIsLoading(true);
+      const data = await partnersApi.getById(Number(id));
+      setPartner(data);
+      if (data) {
+        setEditData({
+          name: data.name,
+          email: data.email,
+          whatsapp: data.whatsapp,
+          cnpj: data.cnpj,
+          cep: data.cep,
+          street: data.street,
+          number: data.number,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+        });
+      }
+    } catch (error) {
+      console.error('Error loading partner:', error);
+      toast.error('Erro ao carregar parceiro');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (partner && !editData) {
-      setEditData({ ...partner });
-    }
-  }, [partner]);
+    loadPartner();
+  }, [id]);
 
   const handleEdit = () => {
     if (partner) {
-      setEditData({ ...partner });
+      setEditData({
+        name: partner.name,
+        email: partner.email,
+        whatsapp: partner.whatsapp,
+        cnpj: partner.cnpj,
+        cep: partner.cep,
+        street: partner.street,
+        number: partner.number,
+        neighborhood: partner.neighborhood,
+        city: partner.city,
+        state: partner.state,
+      });
       setIsEditing(true);
     }
   };
 
   const handleCancelEdit = () => {
-    setEditData(partner ? { ...partner } : null);
+    if (partner) {
+      setEditData({
+        name: partner.name,
+        email: partner.email,
+        whatsapp: partner.whatsapp,
+        cnpj: partner.cnpj,
+        cep: partner.cep,
+        street: partner.street,
+        number: partner.number,
+        neighborhood: partner.neighborhood,
+        city: partner.city,
+        state: partner.state,
+      });
+    }
     setIsEditing(false);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editData || !id) return;
 
-    setPartners(prev => prev.map(p => p.id === id ? editData : p));
-    setIsEditing(false);
-    toast.success('Parceiro atualizado com sucesso!');
+    try {
+      setIsSaving(true);
+      await partnersApi.update(Number(id), {
+        name: editData.name,
+        email: editData.email,
+        metadata: {
+          cnpj: editData.cnpj,
+          whatsapp: editData.whatsapp,
+          cep: editData.cep,
+          rua: editData.street,
+          numero: editData.number,
+          bairro: editData.neighborhood,
+          cidade: editData.city,
+          estado: editData.state,
+        },
+      });
+      await loadPartner();
+      setIsEditing(false);
+      toast.success('Parceiro atualizado com sucesso!');
+    } catch (error) {
+      console.error('Error updating partner:', error);
+      toast.error('Erro ao atualizar parceiro');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!id) return;
     
-    setPartners(prev => prev.filter(p => p.id !== id));
-    toast.success('Parceiro excluído com sucesso!');
-    navigate('/partners');
+    try {
+      await partnersApi.delete(Number(id));
+      toast.success('Parceiro excluído com sucesso!');
+      navigate('/partners');
+    } catch (error) {
+      console.error('Error deleting partner:', error);
+      toast.error('Erro ao excluir parceiro');
+    }
   };
 
-  const handleChange = (field: keyof Partner, value: string) => {
+  const handleChange = (field: keyof EditData, value: string) => {
     if (editData) {
       setEditData({ ...editData, [field]: value });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!partner) {
     return (
@@ -96,12 +194,16 @@ export default function PartnerDetails() {
         <div className="flex items-center gap-2">
           {isEditing ? (
             <>
-              <Button variant="outline" onClick={handleCancelEdit}>
+              <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
-              <Button onClick={handleSaveEdit}>
-                <Save className="h-4 w-4 mr-2" />
+              <Button onClick={handleSaveEdit} disabled={isSaving}>
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
                 Salvar
               </Button>
             </>
@@ -184,10 +286,10 @@ export default function PartnerDetails() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Telefone</Label>
+                    <Label>WhatsApp</Label>
                     <Input
-                      value={editData?.phone || ''}
-                      onChange={(e) => handleChange('phone', e.target.value)}
+                      value={editData?.whatsapp || ''}
+                      onChange={(e) => handleChange('whatsapp', e.target.value)}
                       placeholder="(11) 99999-9999"
                     />
                   </div>
@@ -254,8 +356,8 @@ export default function PartnerDetails() {
                     <div className="flex items-center gap-3">
                       <Phone className="h-5 w-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Telefone</p>
-                        <p className="font-medium">{partner.phone}</p>
+                        <p className="text-sm text-muted-foreground">WhatsApp</p>
+                        <p className="font-medium">{partner.whatsapp}</p>
                       </div>
                     </div>
                   </div>
@@ -286,17 +388,35 @@ export default function PartnerDetails() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Scissors className="h-5 w-5" />
-                Serviços Relacionados
+                Serviços do Parceiro
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Scissors className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Serviços são gerenciados na aba Serviços</p>
-                <Button variant="outline" className="mt-4" onClick={() => navigate('/services')}>
-                  Ir para Serviços
-                </Button>
-              </div>
+              {partner.services.length === 0 ? (
+                <div className="text-center py-8">
+                  <Scissors className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Nenhum serviço cadastrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {partner.services.map(service => (
+                    <div key={service.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{service.name}</p>
+                        <p className="text-sm text-muted-foreground">{service.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-primary">
+                          {service.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </p>
+                        <Badge variant={service.isActive ? 'default' : 'secondary'}>
+                          {service.isActive ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -312,6 +432,16 @@ export default function PartnerDetails() {
                 <span className="font-semibold">
                   {new Date(partner.createdAt).toLocaleDateString('pt-BR')}
                 </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <Badge variant={partner.confirmed ? 'default' : 'secondary'}>
+                  {partner.confirmed ? 'Confirmado' : 'Pendente'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Serviços</span>
+                <span className="font-semibold">{partner.services.length}</span>
               </div>
             </CardContent>
           </Card>
