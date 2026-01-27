@@ -1,26 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Building2 } from 'lucide-react';
+import { Plus, Search, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { PartnerModal } from '@/components/PartnerModal';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { partnersApi } from '@/lib/api';
 import { Partner } from '@/types';
+import { toast } from 'sonner';
 
 export default function Partners() {
-  const [partners, setPartners] = useLocalStorage<Partner[]>('platai-partners', []);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const handleSavePartner = (partnerData: Omit<Partner, 'id' | 'createdAt'>) => {
-    const newPartner: Partner = {
-      ...partnerData,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+  const loadPartners = async () => {
+    try {
+      setIsLoading(true);
+      const data = await partnersApi.list();
+      setPartners(data);
+    } catch (error) {
+      console.error('Error loading partners:', error);
+      toast.error('Erro ao carregar parceiros');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPartners();
+  }, []);
+
+  const handleSavePartner = async (partnerData: {
+    name: string;
+    email: string;
+    metadata: {
+      cnpj: string;
+      whatsapp: string;
+      cep: string;
+      rua: string;
+      numero: string;
+      bairro: string;
+      cidade: string;
+      estado: string;
     };
-    setPartners(prev => [...prev, newPartner]);
+  }) => {
+    try {
+      await partnersApi.create(partnerData);
+      await loadPartners();
+      toast.success('Parceiro cadastrado com sucesso!');
+    } catch (error) {
+      console.error('Error creating partner:', error);
+      toast.error('Erro ao cadastrar parceiro');
+    }
   };
 
   const filteredPartners = partners.filter(partner =>
@@ -28,6 +62,14 @@ export default function Partners() {
     partner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     partner.cnpj.includes(searchTerm)
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -85,7 +127,7 @@ export default function Partners() {
                     <p className="text-sm text-muted-foreground">{partner.email}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm text-foreground">{partner.phone}</p>
+                    <p className="text-sm text-foreground">{partner.whatsapp}</p>
                     <p className="text-xs text-muted-foreground">{partner.cnpj}</p>
                   </div>
                 </div>

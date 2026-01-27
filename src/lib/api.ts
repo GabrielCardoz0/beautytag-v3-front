@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiService, ApiForm, Service, Form, apiServiceToService, apiFormToForm } from '@/types';
+import { ApiService, ApiForm, ApiPartner, Service, Form, Partner, apiServiceToService, apiFormToForm, apiPartnerToPartner } from '@/types';
 
 // Configuração base do axios
 const api = axios.create({
@@ -41,40 +41,61 @@ export default api;
 
 // ============ API Services (Real) ============
 
-// Partners API (ainda mockado)
+// Partners API (Real)
 export const partnersApi = {
-  list: async () => {
-    const partners = localStorage.getItem('platai-partners');
-    return partners ? JSON.parse(partners) : [];
+  list: async (): Promise<Partner[]> => {
+    const response = await api.get<{ users: ApiPartner[] }>('/users');
+    return response.data.users.map(apiPartnerToPartner);
   },
   
-  getById: async (id: string) => {
-    const partners = await partnersApi.list();
-    return partners.find((p: any) => p.id === id);
-  },
-  
-  create: async (data: any) => {
-    const partners = await partnersApi.list();
-    const newPartner = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    localStorage.setItem('platai-partners', JSON.stringify([...partners, newPartner]));
-    return newPartner;
-  },
-  
-  update: async (id: string, data: any) => {
-    const partners = await partnersApi.list();
-    const index = partners.findIndex((p: any) => p.id === id);
-    if (index > -1) {
-      partners[index] = { ...partners[index], ...data };
-      localStorage.setItem('platai-partners', JSON.stringify(partners));
-      return partners[index];
+  getById: async (id: number): Promise<Partner | null> => {
+    try {
+      const response = await api.get<{ user: ApiPartner }>(`/users/${id}`);
+      return apiPartnerToPartner(response.data.user);
+    } catch (error) {
+      console.error('Error fetching partner:', error);
+      return null;
     }
-    throw new Error('Partner not found');
   },
   
-  delete: async (id: string) => {
-    const partners = await partnersApi.list();
-    const filtered = partners.filter((p: any) => p.id !== id);
-    localStorage.setItem('platai-partners', JSON.stringify(filtered));
+  create: async (data: {
+    name: string;
+    email: string;
+    metadata: {
+      cnpj: string;
+      whatsapp: string;
+      cep: string;
+      rua: string;
+      numero: string;
+      bairro: string;
+      cidade: string;
+      estado: string;
+    };
+  }): Promise<Partner> => {
+    const response = await api.post<{ user: ApiPartner }>('/users', data);
+    return apiPartnerToPartner(response.data.user);
+  },
+  
+  update: async (id: number, data: {
+    name?: string;
+    email?: string;
+    metadata?: {
+      cnpj?: string;
+      whatsapp?: string;
+      cep?: string;
+      rua?: string;
+      numero?: string;
+      bairro?: string;
+      cidade?: string;
+      estado?: string;
+    };
+  }): Promise<Partner> => {
+    const response = await api.put<{ user: ApiPartner }>(`/users/${id}`, data);
+    return apiPartnerToPartner(response.data.user);
+  },
+  
+  delete: async (id: number): Promise<boolean> => {
+    await api.delete(`/users/${id}`);
     return true;
   },
 };
