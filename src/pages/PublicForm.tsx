@@ -70,8 +70,9 @@ const PublicForm = () => {
             }
             // Adicionar serviços secundários
             opt.forms_options_secondary_options?.forEach(secOpt => {
-              if (!uniqueServices.find(s => s.id === secOpt.id)) {
-                uniqueServices.push(apiServiceToService(secOpt));
+              const serviceId = secOpt.secondary_option?.id;
+              if (serviceId && !uniqueServices.find(s => s.id === serviceId)) {
+                uniqueServices.push(apiServiceToService(secOpt.secondary_option));
               }
             });
           });

@@ -32,7 +32,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
   };
 
   const addServiceOption = () => {
-    setServiceOptions(prev => [...prev, { serviceId: 0, secondaryServiceIds: [] }]);
+    setServiceOptions(prev => [...prev, { optionId: 0, serviceId: 0, secondaryOptions: [] }]);
     setExpandedIndex(serviceOptions.length);
   };
 
@@ -43,19 +43,19 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
 
   const updateServiceOption = (index: number, serviceId: number) => {
     setServiceOptions(prev => prev.map((opt, i) => 
-      i === index ? { ...opt, serviceId, secondaryServiceIds: [] } : opt
+      i === index ? { ...opt, serviceId, secondaryOptions: [] } : opt
     ));
   };
 
   const toggleSecondaryService = (optionIndex: number, serviceId: number) => {
     setServiceOptions(prev => prev.map((opt, i) => {
       if (i !== optionIndex) return opt;
-      const exists = opt.secondaryServiceIds.includes(serviceId);
+      const exists = opt.secondaryOptions.some(s => s.serviceId === serviceId);
       return {
         ...opt,
-        secondaryServiceIds: exists 
-          ? opt.secondaryServiceIds.filter(id => id !== serviceId)
-          : [...opt.secondaryServiceIds, serviceId]
+        secondaryOptions: exists 
+          ? opt.secondaryOptions.filter(s => s.serviceId !== serviceId)
+          : [...opt.secondaryOptions, { id: 0, serviceId }]
       };
     }));
   };
@@ -159,7 +159,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                 {serviceOptions.map((option, index) => {
                   const service = getServiceById(option.serviceId);
                   const isExpanded = expandedIndex === index;
-                  const secondaryServices = option.secondaryServiceIds.map(id => getServiceById(id)).filter(Boolean);
+                  const secondaryServices = option.secondaryOptions.map(s => getServiceById(s.serviceId)).filter(Boolean);
 
                   return (
                     <Collapsible 
@@ -228,8 +228,8 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                                   key={s.id}
                                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
                                 >
-                                  <Checkbox
-                                    checked={option.secondaryServiceIds.includes(s.id)}
+                                <Checkbox
+                                    checked={option.secondaryOptions.some(sec => sec.serviceId === s.id)}
                                     onCheckedChange={() => toggleSecondaryService(index, s.id)}
                                   />
                                   <div className="flex-1 min-w-0">

@@ -212,6 +212,16 @@ export const formsApi = {
     await api.delete(`/forms/${id}`);
     return true;
   },
+  
+  deleteOption: async (optionId: number): Promise<boolean> => {
+    await api.delete(`/forms/options/${optionId}`);
+    return true;
+  },
+  
+  deleteSecondaryOption: async (secondaryOptionId: number): Promise<boolean> => {
+    await api.delete(`/forms/secondary_options/${secondaryOptionId}`);
+    return true;
+  },
 };
 
 // Auth API
