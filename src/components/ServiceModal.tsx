@@ -164,177 +164,184 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className={isAdmin && !editingService ? "max-w-4xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[90vh] overflow-y-auto"}>
         <DialogHeader>
           <DialogTitle>{editingService ? 'Editar Serviço' : 'Cadastrar Novo Serviço'}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Seleção de Parceiro - apenas para admin ao criar */}
-          {isAdmin && !editingService && (
-            <div className="space-y-2">
-              <Label htmlFor="partner">Parceiro *</Label>
-              {loadingPartners ? (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Carregando parceiros...
+        <form onSubmit={handleSubmit}>
+          <div className={isAdmin && !editingService ? "md:flex md:gap-6" : ""}>
+            {/* Coluna Principal - Dados do Serviço */}
+            <div className={isAdmin && !editingService ? "flex-1 space-y-4" : "space-y-4"}>
+              {/* Seleção de Parceiro - apenas para admin ao criar */}
+              {isAdmin && !editingService && (
+                <div className="space-y-2">
+                  <Label htmlFor="partner">Parceiro *</Label>
+                  {loadingPartners ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Carregando parceiros...
+                    </div>
+                  ) : (
+                    <Select value={formData.user_id} onValueChange={(value) => handleChange('user_id', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o parceiro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {partners.map(partner => (
+                          <SelectItem key={partner.id} value={partner.id.toString()}>
+                            {partner.name} - {partner.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
-              ) : (
-                <Select value={formData.user_id} onValueChange={(value) => handleChange('user_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o parceiro" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {partners.map(partner => (
-                      <SelectItem key={partner.id} value={partner.id.toString()}>
-                        {partner.name} - {partner.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               )}
-            </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="serviceName">Nome *</Label>
-            <Input
-              id="serviceName"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Corte Masculino"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="serviceName">Nome *</Label>
+                <Input
+                  id="serviceName"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  placeholder="Corte Masculino"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Descrição do serviço..."
-              rows={3}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  placeholder="Descrição do serviço..."
+                  rows={3}
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">Preço (R$) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) => handleChange('price', e.target.value)}
-                placeholder="120.00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="spentTime">Duração (min) *</Label>
-              <Input
-                id="spentTime"
-                type="number"
-                min="1"
-                value={formData.spentTime}
-                onChange={(e) => handleChange('spentTime', e.target.value)}
-                placeholder="30"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="gender">Gênero *</Label>
-            <Select value={formData.gender} onValueChange={(value) => handleChange('gender', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o gênero" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="masculino">Masculino</SelectItem>
-                <SelectItem value="feminino">Feminino</SelectItem>
-                <SelectItem value="unissex">Unissex</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Campos adicionais para admin ao criar */}
-          {isAdmin && !editingService && (
-            <div className="space-y-4 pt-4 border-t">
-              <h4 className="text-sm font-medium text-muted-foreground">Configurações Financeiras (opcional)</h4>
-              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="percent_colab">% Colaborador</Label>
+                  <Label htmlFor="price">Preço (R$) *</Label>
                   <Input
-                    id="percent_colab"
+                    id="price"
                     type="number"
                     step="0.01"
                     min="0"
-                    max="100"
-                    value={formData.percent_colab}
-                    onChange={(e) => handleChange('percent_colab', e.target.value)}
-                    placeholder="0"
+                    value={formData.price}
+                    onChange={(e) => handleChange('price', e.target.value)}
+                    placeholder="120.00"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="percent_repasse">% Repasse</Label>
+                  <Label htmlFor="spentTime">Duração (min) *</Label>
                   <Input
-                    id="percent_repasse"
+                    id="spentTime"
                     type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={formData.percent_repasse}
-                    onChange={(e) => handleChange('percent_repasse', e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="preco_parceiro">Preço Parceiro</Label>
-                  <Input
-                    id="preco_parceiro"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.preco_parceiro}
-                    onChange={(e) => handleChange('preco_parceiro', e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="preco_colab">Preço Colaborador</Label>
-                  <Input
-                    id="preco_colab"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.preco_colab}
-                    onChange={(e) => handleChange('preco_colab', e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lucro">Lucro</Label>
-                  <Input
-                    id="lucro"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.lucro}
-                    onChange={(e) => handleChange('lucro', e.target.value)}
-                    placeholder="0"
+                    min="1"
+                    value={formData.spentTime}
+                    onChange={(e) => handleChange('spentTime', e.target.value)}
+                    placeholder="30"
                   />
                 </div>
               </div>
-            </div>
-          )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gênero *</Label>
+                <Select value={formData.gender} onValueChange={(value) => handleChange('gender', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o gênero" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="masculino">Masculino</SelectItem>
+                    <SelectItem value="feminino">Feminino</SelectItem>
+                    <SelectItem value="unissex">Unissex</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Coluna Lateral - Configurações Financeiras (apenas admin ao criar) */}
+            {isAdmin && !editingService && (
+              <div className="md:w-72 md:border-l md:pl-6 mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
+                <h4 className="text-sm font-medium text-muted-foreground mb-4">Configurações Financeiras</h4>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="percent_colab">% Colaborador</Label>
+                      <Input
+                        id="percent_colab"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={formData.percent_colab}
+                        onChange={(e) => handleChange('percent_colab', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="percent_repasse">% Repasse</Label>
+                      <Input
+                        id="percent_repasse"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={formData.percent_repasse}
+                        onChange={(e) => handleChange('percent_repasse', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="preco_parceiro">Preço Parceiro</Label>
+                      <Input
+                        id="preco_parceiro"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.preco_parceiro}
+                        onChange={(e) => handleChange('preco_parceiro', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="preco_colab">Preço Colaborador</Label>
+                      <Input
+                        id="preco_colab"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.preco_colab}
+                        onChange={(e) => handleChange('preco_colab', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2 col-span-2 md:col-span-1">
+                      <Label htmlFor="lucro">Lucro</Label>
+                      <Input
+                        id="lucro"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.lucro}
+                        onChange={(e) => handleChange('lucro', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 mt-6 border-t">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

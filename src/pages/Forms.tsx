@@ -78,7 +78,7 @@ export default function Forms() {
         description: formData.description || undefined,
         forms_options: formData.serviceOptions.map(opt => ({
           id: opt.serviceId,
-          secondary_options: opt.secondaryServiceIds.map(id => ({ id })),
+          secondary_options: opt.secondaryOptions.map(sec => ({ id: sec.serviceId })),
         })),
       });
       toast.success('Formulário cadastrado com sucesso!');
@@ -100,7 +100,7 @@ export default function Forms() {
         description: formData.description || undefined,
         forms_options: formData.serviceOptions.map(opt => ({
           id: opt.serviceId,
-          secondary_options: opt.secondaryServiceIds.map(id => ({ id })),
+          secondary_options: opt.secondaryOptions.map(sec => ({ id: sec.serviceId })),
         })),
       });
       toast.success('Formulário atualizado com sucesso!');

@@ -102,6 +102,16 @@ export interface User {
   updated_at?: string;
 }
 
+// Tipo da API para opção secundária
+export interface ApiFormSecondaryOption {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  form_option_id: number;
+  service_id: number;
+  secondary_option: ApiService;
+}
+
 // Tipo da API para opções de formulário
 export interface ApiFormOption {
   id: number;
@@ -110,7 +120,7 @@ export interface ApiFormOption {
   service_id: number;
   form_id: number;
   options: ApiService;
-  forms_options_secondary_options: ApiService[];
+  forms_options_secondary_options: ApiFormSecondaryOption[];
 }
 
 // Tipo da API para formulário
@@ -123,10 +133,17 @@ export interface ApiForm {
   forms_options: ApiFormOption[];
 }
 
+// Tipo usado internamente para opções secundárias
+export interface FormSecondaryOption {
+  id: number; // ID da opção secundária (para deletar)
+  serviceId: number;
+}
+
 // Tipo usado internamente
 export interface FormServiceOption {
+  optionId: number; // ID da opção no formulário (para deletar)
   serviceId: number;
-  secondaryServiceIds: number[];
+  secondaryOptions: FormSecondaryOption[];
 }
 
 export interface Form {
@@ -168,8 +185,12 @@ export function apiFormToForm(apiForm: ApiForm): Form {
     name: apiForm.name,
     description: apiForm.description || '',
     serviceOptions: apiForm.forms_options.map(opt => ({
+      optionId: opt.id,
       serviceId: opt.options.id,
-      secondaryServiceIds: opt.forms_options_secondary_options.map(s => s.id),
+      secondaryOptions: opt.forms_options_secondary_options.map(sec => ({
+        id: sec.id,
+        serviceId: sec.secondary_option.id,
+      })),
     })),
     createdAt: apiForm.created_at,
   };
