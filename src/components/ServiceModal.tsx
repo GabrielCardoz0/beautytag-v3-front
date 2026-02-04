@@ -53,10 +53,17 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
     user_id: '',
     percent_colab: '0',
     percent_repasse: '0',
-    preco_parceiro: '0',
-    preco_colab: '0',
-    lucro: '0',
   });
+
+  // Valores calculados automaticamente
+  const price = parseFloat(formData.price) || 0;
+  const percentColab = (parseFloat(formData.percent_colab) || 0) / 100;
+  const percentRepasse = (parseFloat(formData.percent_repasse) || 0) / 100;
+  
+  // Fórmulas fornecidas pelo cliente
+  const collaboratorPrice = price - (price * percentColab);
+  const partnerPrice = collaboratorPrice * (1 - percentRepasse);
+  const profit = collaboratorPrice * percentRepasse;
 
   useEffect(() => {
     if (open && isAdmin && !editingService) {
@@ -75,9 +82,6 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
         user_id: '',
         percent_colab: editingService.colaboradorPercent?.toString() || '0',
         percent_repasse: editingService.repassePercent?.toString() || '0',
-        preco_parceiro: '0',
-        preco_colab: '0',
-        lucro: '0',
       });
     } else {
       resetForm();
@@ -107,9 +111,6 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
       user_id: '',
       percent_colab: '0',
       percent_repasse: '0',
-      preco_parceiro: '0',
-      preco_colab: '0',
-      lucro: '0',
     });
   };
 
@@ -149,9 +150,9 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
           user_id: parseInt(formData.user_id),
           percent_colab: parseFloat(formData.percent_colab) || 0,
           percent_repasse: parseFloat(formData.percent_repasse) || 0,
-          preco_parceiro: parseFloat(formData.preco_parceiro) || 0,
-          preco_colab: parseFloat(formData.preco_colab) || 0,
-          lucro: parseFloat(formData.lucro) || 0,
+          preco_parceiro: partnerPrice,
+          preco_colab: collaboratorPrice,
+          lucro: profit,
         });
       } else {
         onSave(baseServiceData);
@@ -268,7 +269,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
                 <h4 className="text-sm font-medium text-muted-foreground mb-4">Configurações Financeiras</h4>
                 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="percent_colab">% Colaborador</Label>
                       <Input
@@ -296,44 +297,24 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
                         placeholder="0"
                       />
                     </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="preco_parceiro">Preço Parceiro</Label>
-                      <Input
-                        id="preco_parceiro"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.preco_parceiro}
-                        onChange={(e) => handleChange('preco_parceiro', e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="preco_colab">Preço Colaborador</Label>
-                      <Input
-                        id="preco_colab"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.preco_colab}
-                        onChange={(e) => handleChange('preco_colab', e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <div className="space-y-2 col-span-2 md:col-span-1">
-                      <Label htmlFor="lucro">Lucro</Label>
-                      <Input
-                        id="lucro"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.lucro}
-                        onChange={(e) => handleChange('lucro', e.target.value)}
-                        placeholder="0"
-                      />
+                  {/* Valores Calculados */}
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide">Valores Calculados</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                        <span className="text-sm text-muted-foreground">Preço Colaborador</span>
+                        <span className="font-medium text-foreground">R$ {collaboratorPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                        <span className="text-sm text-muted-foreground">Preço Parceiro</span>
+                        <span className="font-medium text-foreground">R$ {partnerPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-primary/10 rounded">
+                        <span className="text-sm font-medium text-primary">Lucro</span>
+                        <span className="font-bold text-primary">R$ {profit.toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
