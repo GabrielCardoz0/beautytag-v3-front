@@ -19,9 +19,10 @@ interface FormEditModalProps {
   form: Form | null;
   services: Service[];
   onSave: (formId: number, data: { name: string; description: string; serviceOptions: FormServiceOption[] }) => void;
+  onRefresh?: () => void;
 }
 
-export function FormEditModal({ open, onOpenChange, form, services, onSave }: FormEditModalProps) {
+export function FormEditModal({ open, onOpenChange, form, services, onSave, onRefresh }: FormEditModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -59,6 +60,7 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave }: Fo
         setDeletingOptionId(option.optionId);
         await formsApi.deleteOption(option.optionId);
         toast.success('Serviço removido do formulário');
+        onRefresh?.();
       } catch (error) {
         console.error('Error deleting option:', error);
         toast.error('Erro ao remover serviço');
@@ -85,6 +87,7 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave }: Fo
         setDeletingSecondaryId(secondary.id);
         await formsApi.deleteSecondaryOption(secondary.id);
         toast.success('Opção secundária removida');
+        onRefresh?.();
       } catch (error) {
         console.error('Error deleting secondary option:', error);
         toast.error('Erro ao remover opção secundária');

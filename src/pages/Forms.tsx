@@ -337,6 +337,7 @@ export default function Forms() {
         form={selectedForm}
         services={services}
         onSave={handleUpdateForm}
+        onRefresh={loadData}
       />
 
       <AlertDialog open={deleteFormId !== null} onOpenChange={() => setDeleteFormId(null)}>
