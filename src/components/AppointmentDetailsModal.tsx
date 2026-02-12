@@ -1,22 +1,29 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Appointment } from "./AppointmentCard";
 import { Clock, User, Phone, FileText, DollarSign, Calendar as CalendarIcon, Package } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { AppointmentData } from "@/types";
 
 interface AppointmentDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  appointment: Appointment | null;
+  appointment: AppointmentData | null;
+  onDelete?: (id: number) => void;
 }
 
 export function AppointmentDetailsModal({
   open,
   onOpenChange,
   appointment,
+  onDelete,
 }: AppointmentDetailsModalProps) {
   if (!appointment) return null;
+
+  const totalPrice = appointment.services.reduce((sum, s) => sum + s.price, 0);
+  const totalDuration = appointment.services.reduce((sum, s) => sum + s.spent_time, 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,12 +42,12 @@ export function AppointmentDetailsModal({
               </div>
             </div>
 
-            {appointment.phone && (
+            {appointment.clientPhone && (
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Telefone</p>
-                  <p className="text-base">{appointment.phone}</p>
+                  <p className="text-base">{appointment.clientPhone}</p>
                 </div>
               </div>
             )}
@@ -51,10 +58,10 @@ export function AppointmentDetailsModal({
               <Package className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Serviços ({appointment.services?.length || 0})
+                  Serviços ({appointment.services.length})
                 </p>
                 <div className="space-y-2">
-                  {appointment.services?.map((service) => (
+                  {appointment.services.map((service) => (
                     <div
                       key={service.id}
                       className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -73,7 +80,7 @@ export function AppointmentDetailsModal({
                         </div>
                       </div>
                       <p className="font-semibold text-primary">
-                        R$ {(service.price / 100).toFixed(2).replace('.', ',')}
+                        R$ {(service.price / 100).toFixed(2).replace(".", ",")}
                       </p>
                     </div>
                   ))}
@@ -87,7 +94,7 @@ export function AppointmentDetailsModal({
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Horário</p>
                   <p className="text-base">
-                    {appointment.startTime} - {appointment.endTime}
+                    {format(appointment.startAt, "HH:mm")} - {format(appointment.endAt, "HH:mm")}
                   </p>
                 </div>
               </div>
@@ -95,8 +102,10 @@ export function AppointmentDetailsModal({
               <div className="flex items-start gap-3">
                 <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Duração</p>
-                  <p className="text-base">{appointment.duration} minutos</p>
+                  <p className="text-sm font-medium text-muted-foreground">Data</p>
+                  <p className="text-base">
+                    {format(appointment.startAt, "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
                 </div>
               </div>
             </div>
@@ -108,7 +117,7 @@ export function AppointmentDetailsModal({
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Valor Total</p>
                 <p className="text-xl font-bold text-primary">
-                  R$ {(appointment.price / 100).toFixed(2).replace('.', ',')}
+                  R$ {(totalPrice / 100).toFixed(2).replace(".", ",")}
                 </p>
               </div>
             </div>
@@ -132,7 +141,12 @@ export function AppointmentDetailsModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
-          <Button variant="destructive">Cancelar Agendamento</Button>
+          <Button
+            variant="destructive"
+            onClick={() => onDelete?.(appointment.id)}
+          >
+            Cancelar Agendamento
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

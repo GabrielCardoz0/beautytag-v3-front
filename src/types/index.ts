@@ -154,6 +154,63 @@ export interface Form {
   createdAt: string;
 }
 
+// Tipo da API para serviço vinculado ao agendamento
+export interface ApiAppointmentService {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  appointment_id: number;
+  service_id: number;
+  services: ApiService;
+}
+
+// Tipo da API para agendamento
+export interface ApiAppointment {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  start_at: string;
+  end_at: string;
+  status: string;
+  notes: string | null;
+  client_name: string;
+  client_phone: string;
+  user_id: number;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    metadata: Record<string, string> | null;
+  } | null;
+  appointments_services: ApiAppointmentService[];
+}
+
+// Tipo interno para agendamento
+export interface AppointmentData {
+  id: number;
+  clientName: string;
+  clientPhone: string;
+  startAt: Date;
+  endAt: Date;
+  status: string;
+  notes: string | null;
+  services: ApiService[];
+}
+
+export function apiAppointmentToAppointment(api: ApiAppointment): AppointmentData {
+  return {
+    id: api.id,
+    clientName: api.client_name,
+    clientPhone: api.client_phone,
+    startAt: new Date(api.start_at),
+    endAt: new Date(api.end_at),
+    status: api.status,
+    notes: api.notes,
+    services: api.appointments_services.map(as => as.services),
+  };
+}
+
 export interface Notification {
   id: number;
   title: string;
