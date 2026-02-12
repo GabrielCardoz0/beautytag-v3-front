@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiService, ApiForm, ApiPartner, Service, Form, Partner, apiServiceToService, apiFormToForm, apiPartnerToPartner } from '@/types';
+import { ApiService, ApiForm, ApiPartner, ApiAppointment, AppointmentData, Service, Form, Partner, apiServiceToService, apiFormToForm, apiPartnerToPartner, apiAppointmentToAppointment } from '@/types';
 
 // Configuração base do axios
 const api = axios.create({
@@ -220,6 +220,33 @@ export const formsApi = {
   
   deleteSecondaryOption: async (secondaryOptionId: number): Promise<boolean> => {
     await api.delete(`/forms/secondary_options/${secondaryOptionId}`);
+    return true;
+  },
+};
+
+// Appointments API (Real)
+export const appointmentsApi = {
+  list: async (startAt: string, endAt: string): Promise<AppointmentData[]> => {
+    const response = await api.get<{ appointments: ApiAppointment[] }>('/appointments', {
+      params: { start_at: startAt, end_at: endAt },
+    });
+    return response.data.appointments.map(apiAppointmentToAppointment);
+  },
+
+  create: async (data: {
+    client_name: string;
+    client_phone: string;
+    start_at: string;
+    end_at: string;
+    notes?: string;
+    service_id: number;
+  }): Promise<AppointmentData> => {
+    const response = await api.post<{ appointment: ApiAppointment }>('/appointments', data);
+    return apiAppointmentToAppointment(response.data.appointment);
+  },
+
+  delete: async (id: number): Promise<boolean> => {
+    await api.delete(`/appointments/${id}`);
     return true;
   },
 };
