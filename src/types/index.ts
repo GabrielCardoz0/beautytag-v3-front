@@ -220,6 +220,99 @@ export interface Notification {
   updated_at: string;
 }
 
+// Tipo da API para serviço do plano
+export interface ApiPlanService {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  frequency: string;
+  plan_id: number;
+  service_id: number;
+  service: ApiService;
+}
+
+// Tipo da API para plano
+export interface ApiPlan {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  user_id: number;
+  users: {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    email: string;
+    confirmed: boolean;
+    blocked: boolean;
+    role: string;
+    metadata: Record<string, string> | null;
+  };
+  plan_services: ApiPlanService[];
+}
+
+// Tipo interno para serviço do plano
+export interface PlanService {
+  id: number;
+  serviceId: number;
+  serviceName: string;
+  price: number; // em reais
+  frequency: string;
+  spentTime: number;
+}
+
+// Tipo interno para plano
+export interface Plan {
+  id: number;
+  status: string;
+  userName: string;
+  userEmail: string;
+  userPhone: string;
+  userCpf: string;
+  userCompany: string;
+  userGenre: string;
+  userBirthday: string;
+  planServices: PlanService[];
+  totalValue: number;
+  createdAt: string;
+}
+
+export function apiPlanToPlan(api: ApiPlan): Plan {
+  const planServices: PlanService[] = api.plan_services.map(ps => ({
+    id: ps.id,
+    serviceId: ps.service_id,
+    serviceName: ps.service.name,
+    price: ps.service.price / 100,
+    frequency: ps.frequency,
+    spentTime: ps.service.spent_time,
+  }));
+
+  const frequencyMultiplier = (freq: string): number => {
+    const match = freq.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 1;
+  };
+
+  const totalValue = planServices.reduce((sum, ps) => {
+    return sum + ps.price * frequencyMultiplier(ps.frequency);
+  }, 0);
+
+  return {
+    id: api.id,
+    status: api.status,
+    userName: api.users.name,
+    userEmail: api.users.email,
+    userPhone: api.users.metadata?.whatsapp || '',
+    userCpf: api.users.metadata?.cpf || '',
+    userCompany: api.users.metadata?.empresa || '',
+    userGenre: api.users.metadata?.genre || '',
+    userBirthday: api.users.metadata?.birthday || '',
+    planServices,
+    totalValue,
+    createdAt: api.created_at,
+  };
+}
+
 // Helpers para converter da API para formato interno
 export function apiServiceToService(apiService: ApiService): Service {
   return {

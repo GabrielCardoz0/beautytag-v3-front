@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiService, ApiForm, ApiPartner, ApiAppointment, AppointmentData, Service, Form, Partner, apiServiceToService, apiFormToForm, apiPartnerToPartner, apiAppointmentToAppointment } from '@/types';
+import { ApiService, ApiForm, ApiPartner, ApiAppointment, ApiPlan, AppointmentData, Service, Form, Partner, Plan, apiServiceToService, apiFormToForm, apiPartnerToPartner, apiAppointmentToAppointment, apiPlanToPlan } from '@/types';
 
 // Configuração base do axios
 const api = axios.create({
@@ -280,6 +280,7 @@ export const authApi = {
 
 // Notifications API (ainda mockado)
 export const notificationsApi = {
+  // ... keep existing code
   list: async () => {
     const notifications = localStorage.getItem('platai-notifications');
     return notifications ? JSON.parse(notifications) : [];
@@ -326,5 +327,21 @@ export const notificationsApi = {
     const filtered = notifications.filter((n: any) => n.id !== id);
     localStorage.setItem('platai-notifications', JSON.stringify(filtered));
     return true;
+  },
+};
+
+// Plans API (Real)
+export const plansApi = {
+  list: async (): Promise<Plan[]> => {
+    const response = await api.get<{ plans: ApiPlan[] }>('/plans');
+    return response.data.plans.map(apiPlanToPlan);
+  },
+
+  addService: async (planId: number, serviceId: number, frequency: string): Promise<void> => {
+    await api.post(`/plans/${planId}`, { service_id: serviceId, frequency });
+  },
+
+  removeService: async (planId: number, serviceId: number): Promise<void> => {
+    await api.delete(`/plans/${planId}/${serviceId}`);
   },
 };

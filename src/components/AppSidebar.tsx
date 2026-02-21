@@ -1,4 +1,4 @@
-import { Calendar, Scissors, Settings, Building2, LogOut, FileText, Bot, Bell } from "lucide-react";
+import { Calendar, Scissors, Settings, Building2, LogOut, FileText, Bot, Bell, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 const allMenuItems = [
   { title: "Calendário", url: "/calendar", icon: Calendar, roles: ['admin', 'partner'] },
   { title: "Parceiros", url: "/partners", icon: Building2, roles: ['admin'] },
+  { title: "Colaboradores", url: "/collaborators", icon: Users, roles: ['admin'] },
   { title: "Serviços", url: "/services", icon: Scissors, roles: ['admin', 'partner'] },
   { title: "Formulários", url: "/forms", icon: FileText, roles: ['admin'] },
   { title: "Notificações", url: "/notifications", icon: Bell, roles: ['admin'] },
