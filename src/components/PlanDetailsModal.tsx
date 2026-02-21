@@ -176,8 +176,11 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
                     <p className="font-medium text-foreground text-sm">{ps.serviceName}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                       <span>R$ {ps.price.toFixed(2)}</span>
+                      <span>×</span>
                       <Badge variant="secondary" className="text-xs">{ps.frequency}</Badge>
-                      <span>{ps.spentTime} min</span>
+                      <span>=</span>
+                      <span className="font-semibold text-foreground">R$ {(ps.price * parseInt(ps.frequency)).toFixed(2)}</span>
+                      <span>• {ps.spentTime} min</span>
                     </div>
                   </div>
                   <Button
