@@ -24,7 +24,7 @@ const allMenuItems = [
   { title: "Formulários", url: "/forms", icon: FileText, roles: ['admin'] },
   { title: "Notificações", url: "/notifications", icon: Bell, roles: ['admin'] },
   { title: "Bot de Atendimento", url: "/bot-settings", icon: Bot, roles: ['admin'] },
-  { title: "Configurações", url: "/settings", icon: Settings, roles: ['admin', 'partner'] },
+  // { title: "Configurações", url: "/settings", icon: Settings, roles: ['admin', 'partner'] },
 ];
 
 export function AppSidebar() {
@@ -44,9 +44,9 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border p-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">P</span>
+            <span className="text-primary-foreground font-bold text-xl">B</span>
           </div>
-          <span className="text-xl font-bold text-sidebar-foreground">PLAT.AI</span>
+          <span className="text-xl font-bold text-sidebar-foreground">BEAUTY TAG</span>
         </div>
       </SidebarHeader>
 

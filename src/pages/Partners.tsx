@@ -53,6 +53,7 @@ export default function Partners() {
       await loadPartners();
       toast.success('Parceiro cadastrado com sucesso!');
     } catch (error) {
+      console.log('DEU ERRO POR ALGUM MOTIVO', error);
       console.error('Error creating partner:', error);
       toast.error('Erro ao cadastrar parceiro');
     }

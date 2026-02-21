@@ -39,9 +39,9 @@ export default function Login() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-2xl">P</span>
+              <span className="text-primary-foreground font-bold text-2xl">B</span>
             </div>
-            <span className="text-2xl font-bold text-foreground">PLAT.AI</span>
+            <span className="text-2xl font-bold text-foreground">BEAUTY TAG</span>
           </div>
           <CardTitle className="text-xl">Bem-vindo de volta</CardTitle>
           <CardDescription>Entre com suas credenciais para acessar</CardDescription>

@@ -207,7 +207,7 @@ export function apiAppointmentToAppointment(api: ApiAppointment): AppointmentDat
     endAt: new Date(api.end_at),
     status: api.status,
     notes: api.notes,
-    services: api.appointments_services.map(as => as.services),
+    services: api.appointments_services?.map(as => as.services),
   };
 }
 
@@ -242,11 +242,11 @@ export function apiFormToForm(apiForm: ApiForm): Form {
     name: apiForm.name,
     description: apiForm.description || '',
     serviceOptions: apiForm.forms_options.map(opt => ({
-      optionId: opt.id,
+      optionId: opt?.id,
       serviceId: opt.options.id,
       secondaryOptions: opt.forms_options_secondary_options.map(sec => ({
         id: sec.id,
-        serviceId: sec.secondary_option.id,
+        serviceId: sec.secondary_option?.id,
       })),
     })),
     createdAt: apiForm.created_at,
