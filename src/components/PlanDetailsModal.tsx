@@ -93,7 +93,7 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Mail className="h-3.5 w-3.5" />
-              <span className="truncate">{plan.userEmail}</span>
+              <span className="break-all">{plan.userEmail}</span>
             </div>
             {plan.userPhone && (
               <div className="flex items-center gap-2 text-muted-foreground">
