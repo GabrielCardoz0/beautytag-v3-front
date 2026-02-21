@@ -15,6 +15,7 @@ import Forms from "./pages/Forms";
 import Settings from "./pages/Settings";
 import BotSettings from "./pages/BotSettings";
 import Notifications from "./pages/Notifications";
+import Collaborators from "./pages/Collaborators";
 import PublicForm from "./pages/PublicForm";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,7 @@ const AppRoutes = () => {
       {/* Protected routes - Admin only */}
       <Route path="/partners" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Partners /></Layout></ProtectedRoute>} />
       <Route path="/partners/:id" element={<ProtectedRoute allowedRoles={['admin']}><Layout><PartnerDetails /></Layout></ProtectedRoute>} />
+      <Route path="/collaborators" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Collaborators /></Layout></ProtectedRoute>} />
       <Route path="/forms" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Forms /></Layout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Notifications /></Layout></ProtectedRoute>} />
       <Route path="/bot-settings" element={<ProtectedRoute allowedRoles={['admin']}><Layout><BotSettings /></Layout></ProtectedRoute>} />
