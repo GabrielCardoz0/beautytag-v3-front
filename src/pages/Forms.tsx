@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, FileText, Trash2, Copy, Check, Loader2, Pencil } from 'lucide-react';
+import { Plus, Search, FileText, Trash2, Copy, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -95,13 +95,10 @@ export default function Forms() {
     serviceOptions: FormServiceOption[];
   }) => {
     try {
+      // Only send name and description, don't send forms_options
       await formsApi.update(formId, {
         name: formData.name,
         description: formData.description || undefined,
-        forms_options: formData.serviceOptions.map(opt => ({
-          id: opt.serviceId,
-          secondary_options: opt.secondaryOptions.map(sec => ({ id: sec.serviceId })),
-        })),
       });
       toast.success('Formulário atualizado com sucesso!');
       setIsEditOpen(false);
@@ -188,7 +185,6 @@ export default function Forms() {
         </Card>
       ) : (
         <>
-          {/* Desktop: Table layout */}
           <div className="hidden md:block border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted/50">
@@ -270,7 +266,6 @@ export default function Forms() {
             </table>
           </div>
 
-          {/* Mobile: Card layout */}
           <div className="md:hidden flex flex-col gap-3">
             {filteredForms.map(form => (
               <Card 

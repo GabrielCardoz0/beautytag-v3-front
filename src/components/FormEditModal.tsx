@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, ChevronDown, ChevronUp, Trash2, Loader2 } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Trash2, Loader2 } from 'lucide-react';
 import { Service, FormServiceOption, Form, FormSecondaryOption } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Checkbox } from '@/components/ui/checkbox';
 import { formsApi } from '@/lib/api';
+import { formatCurrency } from '@/lib/utils';
 
 interface FormEditModalProps {
   open: boolean;
@@ -46,15 +45,9 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const addServiceOption = () => {
-    setServiceOptions(prev => [...prev, { optionId: 0, serviceId: 0, secondaryOptions: [] }]);
-    setExpandedIndex(serviceOptions.length);
-  };
-
   const removeServiceOption = async (index: number) => {
     const option = serviceOptions[index];
     
-    // Se a opção tem um ID real (já existe no servidor), deletar via API
     if (option.optionId > 0) {
       try {
         setDeletingOptionId(option.optionId);
@@ -74,14 +67,7 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
     if (expandedIndex === index) setExpandedIndex(null);
   };
 
-  const updateServiceOption = (index: number, serviceId: number) => {
-    setServiceOptions(prev => prev.map((opt, i) => 
-      i === index ? { ...opt, serviceId, secondaryOptions: [] } : opt
-    ));
-  };
-
   const removeSecondaryService = async (optionIndex: number, secondary: FormSecondaryOption) => {
-    // Se a opção secundária tem um ID real (já existe no servidor), deletar via API
     if (secondary.id > 0) {
       try {
         setDeletingSecondaryId(secondary.id);
@@ -106,32 +92,7 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
     }));
   };
 
-  const toggleSecondaryService = (optionIndex: number, serviceId: number) => {
-    setServiceOptions(prev => prev.map((opt, i) => {
-      if (i !== optionIndex) return opt;
-      const exists = opt.secondaryOptions.some(s => s.serviceId === serviceId);
-      return {
-        ...opt,
-        secondaryOptions: exists 
-          ? opt.secondaryOptions.filter(s => s.serviceId !== serviceId)
-          : [...opt.secondaryOptions, { id: 0, serviceId }]
-      };
-    }));
-  };
-
   const getServiceById = (id: number) => services.find(s => s.id === id);
-
-  const getAvailableServices = (currentIndex: number) => {
-    const usedServiceIds = serviceOptions
-      .filter((_, i) => i !== currentIndex)
-      .map(opt => opt.serviceId);
-    return services.filter(s => !usedServiceIds.includes(s.id));
-  };
-
-  const getSecondaryOptions = (optionIndex: number) => {
-    const mainServiceId = serviceOptions[optionIndex]?.serviceId;
-    return services.filter(s => s.id !== mainServiceId);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +106,7 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
 
     const validOptions = serviceOptions.filter(opt => opt.serviceId > 0);
     if (validOptions.length === 0) {
-      toast.error('Adicione pelo menos um serviço ao formulário');
+      toast.error('O formulário precisa ter pelo menos um serviço');
       return;
     }
 
@@ -190,21 +151,11 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-base">Serviços do Formulário</Label>
-              <Button type="button" variant="outline" size="sm" onClick={addServiceOption}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Serviço
-              </Button>
-            </div>
+            <Label className="text-base">Serviços do Formulário</Label>
 
             {serviceOptions.length === 0 ? (
               <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                <p className="text-muted-foreground mb-2">Nenhum serviço adicionado</p>
-                <Button type="button" variant="ghost" size="sm" onClick={addServiceOption}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar primeiro serviço
-                </Button>
+                <p className="text-muted-foreground">Nenhum serviço no formulário</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -226,30 +177,19 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
                         <div className="p-4 bg-muted/30">
                           <div className="flex items-center gap-3">
                             <div className="flex-1">
-                              <Label className="text-sm text-muted-foreground mb-2 block">Serviço Principal</Label>
-                              <Select 
-                                value={option.serviceId > 0 ? option.serviceId.toString() : ''} 
-                                onValueChange={(value) => updateServiceOption(index, parseInt(value))}
-                                disabled={option.optionId > 0} // Não pode mudar serviço de opção já existente
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione um serviço" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {getAvailableServices(index).map(s => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>
-                                      {s.name} - R$ {s.price.toFixed(2)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Label className="text-sm text-muted-foreground mb-1 block">Serviço Principal</Label>
+                              <p className="font-medium text-foreground">
+                                {service ? `${service.name} - R$ ${formatCurrency(service.price)}` : 'Serviço não encontrado'}
+                              </p>
                             </div>
-                            <div className="flex items-center gap-2 pt-6">
-                              <CollapsibleTrigger asChild>
-                                <Button type="button" variant="ghost" size="icon" disabled={option.serviceId <= 0}>
-                                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                                </Button>
-                              </CollapsibleTrigger>
+                            <div className="flex items-center gap-2">
+                              {secondaryServices.length > 0 && (
+                                <CollapsibleTrigger asChild>
+                                  <Button type="button" variant="ghost" size="icon">
+                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                  </Button>
+                                </CollapsibleTrigger>
+                              )}
                               <Button 
                                 type="button" 
                                 variant="ghost" 
@@ -266,7 +206,6 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
                             </div>
                           </div>
 
-                          {/* Mostrar serviços secundários selecionados com opção de remover */}
                           {secondaryServices.length > 0 && !isExpanded && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               <span className="text-xs text-muted-foreground">Secundários:</span>
@@ -301,55 +240,38 @@ export function FormEditModal({ open, onOpenChange, form, services, onSave, onRe
                         <CollapsibleContent>
                           <div className="p-4 border-t bg-background">
                             <Label className="text-sm text-muted-foreground mb-3 block">
-                              Opções Secundárias (opcional)
+                              Opções Secundárias
                             </Label>
                             
-                            {/* Serviços secundários selecionados com botão de remover */}
-                            {secondaryServices.length > 0 && (
-                              <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                                <p className="text-xs text-muted-foreground mb-2">Selecionados:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {secondaryServices.map(s => s.service && (
-                                    <Badge 
-                                      key={s.serviceId} 
-                                      variant="default" 
-                                      className="flex items-center gap-1 pr-1"
-                                    >
-                                      {s.service.name} - R$ {s.service.price.toFixed(2)}
-                                      <button
-                                        type="button"
-                                        onClick={() => removeSecondaryService(index, s)}
-                                        disabled={deletingSecondaryId === s.id}
-                                        className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                                      >
-                                        {deletingSecondaryId === s.id ? (
-                                          <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : (
-                                          <X className="h-3 w-3" />
-                                        )}
-                                      </button>
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                              {getSecondaryOptions(index).map(s => (
-                                <label 
-                                  key={s.id}
-                                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                            <div className="space-y-2">
+                              {secondaryServices.map(s => s.service && (
+                                <div 
+                                  key={s.serviceId}
+                                  className="flex items-center justify-between p-3 rounded-lg border"
                                 >
-                                  <Checkbox
-                                    checked={option.secondaryOptions.some(sec => sec.serviceId === s.id)}
-                                    onCheckedChange={() => toggleSecondaryService(index, s.id)}
-                                  />
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-sm truncate">{s.name}</p>
-                                    <p className="text-xs text-muted-foreground">R$ {s.price.toFixed(2)}</p>
+                                    <p className="font-medium text-sm">{s.service.name}</p>
+                                    <p className="text-xs text-muted-foreground">R$ {formatCurrency(s.service.price)}</p>
                                   </div>
-                                </label>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => removeSecondaryService(index, s)}
+                                    disabled={deletingSecondaryId === s.id}
+                                  >
+                                    {deletingSecondaryId === s.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                    )}
+                                  </Button>
+                                </div>
                               ))}
+                              {secondaryServices.length === 0 && (
+                                <p className="text-sm text-muted-foreground text-center py-2">Nenhuma opção secundária</p>
+                              )}
                             </div>
                           </div>
                         </CollapsibleContent>
