@@ -152,10 +152,24 @@ export const servicesApi = {
     genre?: string;
     spent_time?: number;
     is_active?: boolean;
+    percent_colab?: number;
+    percent_repasse?: number;
+    preco_parceiro?: number;
+    preco_colab?: number;
+    lucro?: number;
   }): Promise<Service> => {
     const payload: any = { ...data };
     if (data.price !== undefined) {
-      payload.price = Math.round(data.price * 100); // converte reais para centavos
+      payload.price = Math.round(data.price * 100);
+    }
+    if (data.preco_parceiro !== undefined) {
+      payload.preco_parceiro = Math.round(data.preco_parceiro * 100);
+    }
+    if (data.preco_colab !== undefined) {
+      payload.preco_colab = Math.round(data.preco_colab * 100);
+    }
+    if (data.lucro !== undefined) {
+      payload.lucro = Math.round(data.lucro * 100);
     }
     const response = await api.put<{ service: ApiService }>(`/services/${id}`, payload);
     return apiServiceToService(response.data.service);

@@ -7,6 +7,7 @@ import { PlanDetailsModal } from '@/components/PlanDetailsModal';
 import { Plan } from '@/types';
 import { plansApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 export default function Collaborators() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -24,7 +25,6 @@ export default function Collaborators() {
       setLoading(true);
       const data = await plansApi.list();
       setPlans(data);
-      // Update selected plan if open
       if (selectedPlan) {
         const updated = data.find(p => p.id === selectedPlan.id);
         if (updated) setSelectedPlan(updated);
@@ -84,7 +84,6 @@ export default function Collaborators() {
         </Card>
       ) : (
         <>
-          {/* Desktop table */}
           <div className="hidden md:block border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted/50">
@@ -124,7 +123,7 @@ export default function Collaborators() {
                     </td>
                     <td className="p-4 text-center text-muted-foreground">{plan.planServices.length}</td>
                     <td className="p-4 text-right">
-                      <span className="font-bold text-foreground">R$ {plan.totalValue.toFixed(2)}</span>
+                      <span className="font-bold text-foreground">R$ {formatCurrency(plan.totalValue)}</span>
                     </td>
                   </tr>
                 ))}
@@ -132,7 +131,6 @@ export default function Collaborators() {
             </table>
           </div>
 
-          {/* Mobile cards */}
           <div className="md:hidden flex flex-col gap-3">
             {filteredPlans.map(plan => (
               <Card
@@ -160,7 +158,7 @@ export default function Collaborators() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-foreground">R$ {plan.totalValue.toFixed(2)}</p>
+                      <p className="font-bold text-foreground">R$ {formatCurrency(plan.totalValue)}</p>
                     </div>
                   </div>
                 </CardContent>
