@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { partnersApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface ServiceModalProps {
   open: boolean;
@@ -33,6 +34,11 @@ interface ServiceModalProps {
     price: number;
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
+    percent_colab?: number;
+    percent_repasse?: number;
+    preco_parceiro?: number;
+    preco_colab?: number;
+    lucro?: number;
   }) => void;
   editingService?: Service | null;
 }
@@ -55,12 +61,10 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
     percent_repasse: '0',
   });
 
-  // Valores calculados automaticamente
   const price = parseFloat(formData.price) || 0;
   const percentColab = (parseFloat(formData.percent_colab) || 0) / 100;
   const percentRepasse = (parseFloat(formData.percent_repasse) || 0) / 100;
   
-  // Fórmulas fornecidas pelo cliente
   const collaboratorPrice = price - (price * percentColab);
   const partnerPrice = collaboratorPrice * (1 - percentRepasse);
   const profit = collaboratorPrice * percentRepasse;
@@ -126,7 +130,6 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
       return;
     }
 
-    // Admin deve selecionar um parceiro ao criar
     if (isAdmin && !editingService && !formData.user_id) {
       toast.error('Selecione um parceiro');
       return;
@@ -141,9 +144,19 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
     };
 
     if (editingService && onUpdate) {
-      onUpdate(editingService.id, baseServiceData);
+      if (isAdmin) {
+        onUpdate(editingService.id, {
+          ...baseServiceData,
+          percent_colab: parseFloat(formData.percent_colab) || 0,
+          percent_repasse: parseFloat(formData.percent_repasse) || 0,
+          preco_parceiro: partnerPrice,
+          preco_colab: collaboratorPrice,
+          lucro: profit,
+        });
+      } else {
+        onUpdate(editingService.id, baseServiceData);
+      }
     } else {
-      // Para admin, enviar campos adicionais
       if (isAdmin) {
         onSave({
           ...baseServiceData,
@@ -163,18 +176,18 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
     onOpenChange(false);
   };
 
+  const showFinancialPanel = isAdmin;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={isAdmin && !editingService ? "max-w-4xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[90vh] overflow-y-auto"}>
+      <DialogContent className={showFinancialPanel ? "max-w-4xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[90vh] overflow-y-auto"}>
         <DialogHeader>
           <DialogTitle>{editingService ? 'Editar Serviço' : 'Cadastrar Novo Serviço'}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className={isAdmin && !editingService ? "md:flex md:gap-6" : ""}>
-            {/* Coluna Principal - Dados do Serviço */}
-            <div className={isAdmin && !editingService ? "flex-1 space-y-4" : "space-y-4"}>
-              {/* Seleção de Parceiro - apenas para admin ao criar */}
+          <div className={showFinancialPanel ? "md:flex md:gap-6" : ""}>
+            <div className={showFinancialPanel ? "flex-1 space-y-4" : "space-y-4"}>
               {isAdmin && !editingService && (
                 <div className="space-y-2">
                   <Label htmlFor="partner">Parceiro *</Label>
@@ -231,7 +244,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
                     min="0"
                     value={formData.price}
                     onChange={(e) => handleChange('price', e.target.value)}
-                    placeholder="120.00"
+                    placeholder="120,00"
                   />
                 </div>
 
@@ -263,8 +276,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
               </div>
             </div>
 
-            {/* Coluna Lateral - Configurações Financeiras (apenas admin ao criar) */}
-            {isAdmin && !editingService && (
+            {showFinancialPanel && (
               <div className="md:w-72 md:border-l md:pl-6 mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
                 <h4 className="text-sm font-medium text-muted-foreground mb-4">Configurações Financeiras</h4>
                 
@@ -299,21 +311,20 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
                     </div>
                   </div>
 
-                  {/* Valores Calculados */}
                   <div className="pt-4 border-t border-border">
                     <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide">Valores Calculados</p>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
                         <span className="text-sm text-muted-foreground">Preço Colaborador</span>
-                        <span className="font-medium text-foreground">R$ {collaboratorPrice.toFixed(2)}</span>
+                        <span className="font-medium text-foreground">R$ {formatCurrency(collaboratorPrice)}</span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
                         <span className="text-sm text-muted-foreground">Preço Parceiro</span>
-                        <span className="font-medium text-foreground">R$ {partnerPrice.toFixed(2)}</span>
+                        <span className="font-medium text-foreground">R$ {formatCurrency(partnerPrice)}</span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-primary/10 rounded">
                         <span className="text-sm font-medium text-primary">Lucro</span>
-                        <span className="font-bold text-primary">R$ {profit.toFixed(2)}</span>
+                        <span className="font-bold text-primary">R$ {formatCurrency(profit)}</span>
                       </div>
                     </div>
                   </div>

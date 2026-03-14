@@ -9,6 +9,7 @@ import { ServiceDetailsModal } from '@/components/ServiceDetailsModal';
 import { Service } from '@/types';
 import { servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
@@ -77,6 +78,11 @@ export default function Services() {
     price: number;
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
+    percent_colab?: number;
+    percent_repasse?: number;
+    preco_parceiro?: number;
+    preco_colab?: number;
+    lucro?: number;
   }) => {
     try {
       await servicesApi.update(id, {
@@ -85,6 +91,11 @@ export default function Services() {
         price: serviceData.price,
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
+        percent_colab: serviceData.percent_colab,
+        percent_repasse: serviceData.percent_repasse,
+        preco_parceiro: serviceData.preco_parceiro,
+        preco_colab: serviceData.preco_colab,
+        lucro: serviceData.lucro,
       });
       toast.success('Serviço atualizado com sucesso!');
       setEditingService(null);
@@ -179,7 +190,6 @@ export default function Services() {
         </Card>
       ) : (
         <>
-          {/* Desktop: Table layout */}
           <div className="hidden md:block border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted/50">
@@ -224,7 +234,7 @@ export default function Services() {
                     <td className="p-4 text-right text-muted-foreground">{service.colaboradorPercent}%</td>
                     <td className="p-4 text-right">
                       <span className="font-bold text-foreground">
-                        R$ {service.price.toFixed(2)}
+                        R$ {formatCurrency(service.price)}
                       </span>
                     </td>
                   </tr>
@@ -233,7 +243,6 @@ export default function Services() {
             </table>
           </div>
 
-          {/* Mobile: Card layout */}
           <div className="md:hidden flex flex-col gap-3">
             {filteredServices.map(service => (
               <Card 
@@ -258,7 +267,7 @@ export default function Services() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-foreground">R$ {service.price.toFixed(2)}</p>
+                      <p className="font-bold text-foreground">R$ {formatCurrency(service.price)}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Rep: {service.repassePercent}% | Col: {service.colaboradorPercent}%
                       </p>

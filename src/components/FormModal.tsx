@@ -11,6 +11,7 @@ import { Service, FormServiceOption } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Checkbox } from '@/components/ui/checkbox';
+import { formatCurrency } from '@/lib/utils';
 
 interface FormModalProps {
   open: boolean;
@@ -160,6 +161,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                   const service = getServiceById(option.serviceId);
                   const isExpanded = expandedIndex === index;
                   const secondaryServices = option.secondaryOptions.map(s => getServiceById(s.serviceId)).filter(Boolean);
+                  const hasPrimarySelected = option.serviceId > 0;
 
                   return (
                     <Collapsible 
@@ -182,7 +184,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                                 <SelectContent>
                                   {getAvailableServices(index).map(s => (
                                     <SelectItem key={s.id} value={s.id.toString()}>
-                                      {s.name} - R$ {s.price.toFixed(2)}
+                                      {s.name} - R$ {formatCurrency(s.price)}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -190,7 +192,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                             </div>
                             <div className="flex items-center gap-2 pt-6">
                               <CollapsibleTrigger asChild>
-                                <Button type="button" variant="ghost" size="icon" disabled={option.serviceId <= 0}>
+                                <Button type="button" variant="ghost" size="icon" disabled={!hasPrimarySelected}>
                                   {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                 </Button>
                               </CollapsibleTrigger>
@@ -234,7 +236,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
                                   />
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm truncate">{s.name}</p>
-                                    <p className="text-xs text-muted-foreground">R$ {s.price.toFixed(2)}</p>
+                                    <p className="text-xs text-muted-foreground">R$ {formatCurrency(s.price)}</p>
                                   </div>
                                 </label>
                               ))}

@@ -7,6 +7,7 @@ import { Trash2, Plus, Loader2, User, Phone, Mail, Building2, Calendar } from 'l
 import { Plan, Service } from '@/types';
 import { plansApi, servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 interface PlanDetailsModalProps {
   open: boolean;
@@ -83,7 +84,6 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
           <DialogTitle>Detalhes do Plano</DialogTitle>
         </DialogHeader>
 
-        {/* User info */}
         <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
@@ -126,7 +126,6 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
           </div>
         </div>
 
-        {/* Services */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-foreground">Serviços do Plano</h3>
@@ -145,7 +144,7 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
                 <SelectContent>
                   {availableServices.map(s => (
                     <SelectItem key={s.id} value={String(s.id)}>
-                      {s.name} - R$ {s.price.toFixed(2)}
+                      {s.name} - R$ {formatCurrency(s.price)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -175,11 +174,11 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm">{ps.serviceName}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                      <span>R$ {ps.price.toFixed(2)}</span>
+                      <span>R$ {formatCurrency(ps.price)}</span>
                       <span>×</span>
                       <Badge variant="secondary" className="text-xs">{ps.frequency}</Badge>
                       <span>=</span>
-                      <span className="font-semibold text-foreground">R$ {(ps.price * parseInt(ps.frequency)).toFixed(2)}</span>
+                      <span className="font-semibold text-foreground">R$ {formatCurrency(ps.price * parseInt(ps.frequency))}</span>
                       <span>• {ps.spentTime} min</span>
                     </div>
                   </div>
@@ -203,7 +202,7 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
 
           <div className="flex justify-between items-center pt-3 border-t">
             <span className="font-medium text-foreground">Total mensal</span>
-            <span className="font-bold text-lg text-foreground">R$ {plan.totalValue.toFixed(2)}</span>
+            <span className="font-bold text-lg text-foreground">R$ {formatCurrency(plan.totalValue)}</span>
           </div>
         </div>
       </DialogContent>

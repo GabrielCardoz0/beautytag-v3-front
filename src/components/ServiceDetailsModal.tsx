@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Service } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 interface ServiceDetailsModalProps {
   open: boolean;
@@ -32,7 +33,7 @@ export function ServiceDetailsModal({
   onDelete 
 }: ServiceDetailsModalProps) {
   const calculations = useMemo(() => {
-    if (!service) return { precoColaborador: '0.00', precoParceiro: '0.00', lucro: '0.00' };
+    if (!service) return { precoColaborador: '0,00', precoParceiro: '0,00', lucro: '0,00' };
     
     const price = service.price;
     const precoColaborador = price * (service.colaboradorPercent / 100);
@@ -40,9 +41,9 @@ export function ServiceDetailsModal({
     const lucro = price - precoColaborador - precoParceiro;
 
     return {
-      precoColaborador: precoColaborador.toFixed(2),
-      precoParceiro: precoParceiro.toFixed(2),
-      lucro: lucro.toFixed(2),
+      precoColaborador: formatCurrency(precoColaborador),
+      precoParceiro: formatCurrency(precoParceiro),
+      lucro: formatCurrency(lucro),
     };
   }, [service]);
 
@@ -123,7 +124,7 @@ export function ServiceDetailsModal({
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-muted-foreground">Preço Base</span>
-              <span className="text-2xl font-bold text-foreground">R$ {service.price.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-foreground">R$ {formatCurrency(service.price)}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

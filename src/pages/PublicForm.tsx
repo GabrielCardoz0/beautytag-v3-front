@@ -7,8 +7,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm } from '@/types';
-import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+import { formatCurrency } from '@/lib/utils';
 
 interface PersonalInfo {
   nome: string;
@@ -22,7 +23,8 @@ interface PersonalInfo {
 }
 
 interface ServiceSelection {
-  serviceId: number;
+  optionIndex: number; // index in form.serviceOptions
+  serviceId: number; // currently selected service (main or secondary alternative)
   frequency: string;
 }
 
@@ -46,6 +48,7 @@ const PublicForm = () => {
     cep: '',
   });
   const [serviceSelections, setServiceSelections] = useState<ServiceSelection[]>([]);
+  const [swappingIndex, setSwappingIndex] = useState<number | null>(null);
   const videoRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -53,7 +56,6 @@ const PublicForm = () => {
       if (!formId) return;
       
       try {
-        // Buscar formulário pela API pública (sem autenticação)
         const response = await axios.get<{ forms: ApiForm }>(`http://localhost:4000/forms/${formId}`);
         const apiForm = response.data.forms;
         
@@ -61,14 +63,12 @@ const PublicForm = () => {
           const convertedForm = apiFormToForm(apiForm);
           setForm(convertedForm);
           
-          // Extrair serviços únicos das opções do formulário
+          // Extract all unique services (main + secondary)
           const uniqueServices: Service[] = [];
           apiForm.forms_options.forEach(opt => {
-            // Adicionar serviço principal
             if (opt.options && !uniqueServices.find(s => s.id === opt.options.id)) {
               uniqueServices.push(apiServiceToService(opt.options));
             }
-            // Adicionar serviços secundários
             opt.forms_options_secondary_options?.forEach(secOpt => {
               const serviceId = secOpt.secondary_option?.id;
               if (serviceId && !uniqueServices.find(s => s.id === serviceId)) {
@@ -79,8 +79,9 @@ const PublicForm = () => {
           
           setServices(uniqueServices);
           
-          // Initialize service selections
-          const initialSelections = convertedForm.serviceOptions.map(opt => ({
+          // Initialize with main services selected by default
+          const initialSelections = convertedForm.serviceOptions.map((opt, index) => ({
+            optionIndex: index,
             serviceId: opt.serviceId,
             frequency: '',
           }));
@@ -100,12 +101,21 @@ const PublicForm = () => {
     setPersonalInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleServiceFrequencyChange = (serviceId: number, frequency: string) => {
+  const handleServiceFrequencyChange = (optionIndex: number, frequency: string) => {
     setServiceSelections(prev => 
       prev.map(sel => 
-        sel.serviceId === serviceId ? { ...sel, frequency } : sel
+        sel.optionIndex === optionIndex ? { ...sel, frequency } : sel
       )
     );
+  };
+
+  const handleSwapService = (optionIndex: number, newServiceId: number) => {
+    setServiceSelections(prev =>
+      prev.map(sel =>
+        sel.optionIndex === optionIndex ? { ...sel, serviceId: newServiceId, frequency: '' } : sel
+      )
+    );
+    setSwappingIndex(null);
   };
 
   const getServiceById = (id: number) => services.find(s => s.id === id);
@@ -194,7 +204,6 @@ const PublicForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
-      {/* Progress Steps */}
       {currentStep < 6 && (
         <div className="bg-card border-b shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
@@ -466,43 +475,92 @@ const PublicForm = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">
-                Escolha a frequência desejada para cada serviço do seu plano.
+                Escolha a frequência desejada para cada serviço. Você pode trocar por uma opção alternativa se preferir.
               </p>
               <div className="space-y-4 mb-6">
                 {form.serviceOptions.map((option, index) => {
-                  const service = getServiceById(option.serviceId);
-                  const selection = serviceSelections.find(s => s.serviceId === option.serviceId);
+                  const selection = serviceSelections.find(s => s.optionIndex === index);
+                  const currentService = selection ? getServiceById(selection.serviceId) : null;
+                  const isSwapping = swappingIndex === index;
+                  const hasAlternatives = option.secondaryOptions.length > 0;
                   
-                  if (!service) return null;
+                  if (!currentService) return null;
+
+                  // Get all alternative services for this option
+                  const alternatives = [
+                    { serviceId: option.serviceId, isMain: true },
+                    ...option.secondaryOptions.map(sec => ({ serviceId: sec.serviceId, isMain: false })),
+                  ].filter(alt => alt.serviceId !== selection?.serviceId);
                   
                   return (
                     <Card key={index} className="border-2">
                       <CardContent className="pt-4">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div>
-                            <h3 className="font-semibold">{service.name}</h3>
-                            <p className="text-sm text-muted-foreground">{service.description}</p>
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{currentService.name}</h3>
+                            <p className="text-sm text-muted-foreground">{currentService.description}</p>
                             <p className="text-primary font-medium mt-1">
-                              R$ {service.price.toFixed(2)} por sessão
+                              R$ {formatCurrency(currentService.price)} por sessão
                             </p>
                           </div>
-                          <div className="w-full md:w-48">
-                            <Select 
-                              value={selection?.frequency || ''} 
-                              onValueChange={(value) => handleServiceFrequencyChange(option.serviceId, value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Frequência" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="1x">1x por mês</SelectItem>
-                                <SelectItem value="2x">2x por mês</SelectItem>
-                                <SelectItem value="3x">3x por mês</SelectItem>
-                                <SelectItem value="4x">4x por mês</SelectItem>
-                              </SelectContent>
-                            </Select>
+                          <div className="flex items-center gap-2">
+                            <div className="w-full md:w-48">
+                              <Select 
+                                value={selection?.frequency || ''} 
+                                onValueChange={(value) => handleServiceFrequencyChange(index, value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Frequência" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1x">1x por mês</SelectItem>
+                                  <SelectItem value="2x">2x por mês</SelectItem>
+                                  <SelectItem value="3x">3x por mês</SelectItem>
+                                  <SelectItem value="4x">4x por mês</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {hasAlternatives && (
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="icon"
+                                onClick={() => setSwappingIndex(isSwapping ? null : index)}
+                                title="Trocar serviço"
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
+
+                        {isSwapping && alternatives.length > 0 && (
+                          <div className="mt-4 pt-4 border-t">
+                            <p className="text-sm text-muted-foreground mb-3">Trocar por:</p>
+                            <div className="space-y-2">
+                              {alternatives.map(alt => {
+                                const altService = getServiceById(alt.serviceId);
+                                if (!altService) return null;
+                                return (
+                                  <button
+                                    key={alt.serviceId}
+                                    type="button"
+                                    className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+                                    onClick={() => handleSwapService(index, alt.serviceId)}
+                                  >
+                                    <div>
+                                      <p className="font-medium text-sm">{altService.name}</p>
+                                      <p className="text-xs text-muted-foreground">{altService.description}</p>
+                                    </div>
+                                    <span className="text-primary font-medium text-sm whitespace-nowrap ml-4">
+                                      R$ {formatCurrency(altService.price)}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
@@ -513,7 +571,7 @@ const PublicForm = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Total Mensal Estimado:</span>
                   <span className="text-2xl font-bold text-primary">
-                    R$ {calculateTotal().toFixed(2)}
+                    R$ {formatCurrency(calculateTotal())}
                   </span>
                 </div>
               </div>
@@ -574,7 +632,7 @@ const PublicForm = () => {
                             <span className="font-medium">{service.name}</span>
                             <span className="text-muted-foreground ml-2">({sel.frequency} por mês)</span>
                           </div>
-                          <span className="font-semibold">R$ {subtotal.toFixed(2)}</span>
+                          <span className="font-semibold">R$ {formatCurrency(subtotal)}</span>
                         </div>
                       );
                     })}
@@ -585,7 +643,7 @@ const PublicForm = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-medium">Total Mensal:</span>
                     <span className="text-2xl font-bold text-primary">
-                      R$ {calculateTotal().toFixed(2)}
+                      R$ {formatCurrency(calculateTotal())}
                     </span>
                   </div>
                 </div>
