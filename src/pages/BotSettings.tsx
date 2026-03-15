@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone } from 'lucide-react';
+import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,21 +10,73 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from 'sonner';
 import api from '@/lib/api';
 
+const minutesToTime = (minutes: number): string => {
+  const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+  const m = (minutes % 60).toString().padStart(2, '0');
+  return `${h}:${m}`;
+};
+
+const timeToMinutes = (time: string): number => {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+};
+
 export default function BotSettings() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
-  const [welcomeMessage, setWelcomeMessage] = useState('Olá! Bem-vindo ao nosso atendimento. Como posso ajudá-lo?');
+  const [isConnected, setIsConnected] = useState(false);
+  const [welcomeMessage, setWelcomeMessage] = useState('');
   const [responseDelay, setResponseDelay] = useState('2');
   const [businessHoursStart, setBusinessHoursStart] = useState('08:00');
   const [businessHoursEnd, setBusinessHoursEnd] = useState('18:00');
-  const [outOfHoursMessage, setOutOfHoursMessage] = useState('Nosso horário de atendimento é das 08:00 às 18:00. Deixe sua mensagem que responderemos assim que possível.');
+  const [outOfHoursMessage, setOutOfHoursMessage] = useState('');
 
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const handleSave = () => {
-    toast.success('Configurações do bot salvas com sucesso!');
+  useEffect(() => {
+    const fetchBot = async () => {
+      try {
+        const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
+        const bot = response.data.bot;
+        setIsEnabled(bot.is_active);
+        setIsConnected(bot.is_connected);
+        setWelcomeMessage(bot.welcome_msg);
+        setOutOfHoursMessage(bot.out_of_turn_msg);
+        setResponseDelay(String(bot.response_time));
+        setBusinessHoursStart(minutesToTime(bot.start_time));
+        setBusinessHoursEnd(minutesToTime(bot.end_time));
+      } catch (error) {
+        console.error('Error fetching bot settings:', error);
+        toast.error('Erro ao carregar configurações do bot');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBot();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.put('/bot', {
+        is_active: isEnabled,
+        welcome_msg: welcomeMessage,
+        out_of_turn_msg: outOfHoursMessage,
+        response_time: Number(responseDelay),
+        start_time: timeToMinutes(businessHoursStart),
+        end_time: timeToMinutes(businessHoursEnd),
+      });
+      toast.success('Configurações do bot salvas com sucesso!');
+    } catch (error) {
+      console.error('Error saving bot settings:', error);
+      toast.error('Erro ao salvar configurações do bot');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const startWhatsappPolling = async () => {
@@ -38,6 +90,7 @@ export default function BotSettings() {
         if (response.data.is_connected) {
           stopPolling();
           setWhatsappModalOpen(false);
+          setIsConnected(true);
           toast.success('WhatsApp conectado com sucesso!');
           return;
         }
@@ -64,6 +117,14 @@ export default function BotSettings() {
     return () => stopPolling();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
@@ -74,14 +135,13 @@ export default function BotSettings() {
           </h1>
           <p className="text-muted-foreground mt-1">Configure o bot de atendimento automático</p>
         </div>
-        <Button onClick={handleSave}>
-          <Save className="h-4 w-4 mr-2" />
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Salvar Configurações
         </Button>
       </div>
 
       <div className="grid gap-6 max-w-3xl">
-        {/* Status do Bot */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -103,7 +163,6 @@ export default function BotSettings() {
           </CardContent>
         </Card>
 
-        {/* Mensagem de Boas-vindas */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -122,7 +181,6 @@ export default function BotSettings() {
           </CardContent>
         </Card>
 
-        {/* Configurações de Tempo */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -168,7 +226,6 @@ export default function BotSettings() {
           </CardContent>
         </Card>
 
-        {/* Mensagem Fora do Horário */}
         <Card>
           <CardHeader>
             <CardTitle>Mensagem Fora do Horário</CardTitle>
@@ -183,7 +240,7 @@ export default function BotSettings() {
             />
           </CardContent>
         </Card>
-        {/* Conexão WhatsApp */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -193,15 +250,19 @@ export default function BotSettings() {
             <CardDescription>Conecte o bot ao WhatsApp para atendimento automático</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={startWhatsappPolling}>
-              <Smartphone className="h-4 w-4 mr-2" />
-              Conectar WhatsApp
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={startWhatsappPolling} variant={isConnected ? 'outline' : 'default'}>
+                <Smartphone className="h-4 w-4 mr-2" />
+                {isConnected ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
+              </Button>
+              {isConnected && (
+                <span className="text-sm text-green-600 font-medium">● Conectado</span>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* WhatsApp QR Code Modal */}
       <Dialog open={whatsappModalOpen} onOpenChange={(open) => {
         if (!open) {
           stopPolling();
