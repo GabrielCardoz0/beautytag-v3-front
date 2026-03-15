@@ -26,6 +26,9 @@ export default function BotSettings() {
   const [saving, setSaving] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [botName, setBotName] = useState('');
+  const [behavior, setBehavior] = useState('');
+  const [companyDescription, setCompanyDescription] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [responseDelay, setResponseDelay] = useState('2');
   const [businessHoursStart, setBusinessHoursStart] = useState('08:00');
@@ -40,10 +43,13 @@ export default function BotSettings() {
   useEffect(() => {
     const fetchBot = async () => {
       try {
-        const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
+        const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; name: string; behavior: string; company_description: string; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
         const bot = response.data.bot;
         setIsEnabled(bot.is_active);
         setIsConnected(bot.is_connected);
+        setBotName(bot.name || '');
+        setBehavior(bot.behavior || '');
+        setCompanyDescription(bot.company_description || '');
         setWelcomeMessage(bot.welcome_msg);
         setOutOfHoursMessage(bot.out_of_turn_msg);
         setResponseDelay(String(bot.response_time));
@@ -64,6 +70,9 @@ export default function BotSettings() {
     try {
       await api.put('/bot', {
         is_active: isEnabled,
+        name: botName,
+        behavior,
+        company_description: companyDescription,
         welcome_msg: welcomeMessage,
         out_of_turn_msg: outOfHoursMessage,
         response_time: Number(responseDelay),
@@ -159,6 +168,49 @@ export default function BotSettings() {
                 </p>
               </div>
               <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              Identidade do Bot
+            </CardTitle>
+            <CardDescription>Defina o nome, comportamento e contexto da empresa</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="botName">Nome do Bot</Label>
+              <Input
+                id="botName"
+                value={botName}
+                onChange={(e) => setBotName(e.target.value)}
+                placeholder="Ex: Assistente Virtual"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="behavior">Comportamento</Label>
+              <Textarea
+                id="behavior"
+                value={behavior}
+                onChange={(e) => setBehavior(e.target.value)}
+                placeholder="Descreva como o bot deve se comportar..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Instruções de como o bot deve interagir com os clientes</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyDescription">Descrição da Empresa</Label>
+              <Textarea
+                id="companyDescription"
+                value={companyDescription}
+                onChange={(e) => setCompanyDescription(e.target.value)}
+                placeholder="Descreva a empresa para dar contexto ao bot..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Informações sobre a empresa para o bot utilizar nas respostas</p>
             </div>
           </CardContent>
         </Card>
