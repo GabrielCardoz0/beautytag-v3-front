@@ -18,10 +18,51 @@ export default function BotSettings() {
   const [businessHoursEnd, setBusinessHoursEnd] = useState('18:00');
   const [outOfHoursMessage, setOutOfHoursMessage] = useState('Nosso horário de atendimento é das 08:00 às 18:00. Deixe sua mensagem que responderemos assim que possível.');
 
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const handleSave = () => {
-    // Mock save - would call API
     toast.success('Configurações do bot salvas com sucesso!');
   };
+
+  const startWhatsappPolling = async () => {
+    setWhatsappModalOpen(true);
+    setQrLoading(true);
+    setQrCode(null);
+
+    const fetchQr = async () => {
+      try {
+        const response = await api.get<{ is_connected: boolean; base64: string }>('/evolution/qrcode');
+        if (response.data.is_connected) {
+          stopPolling();
+          setWhatsappModalOpen(false);
+          toast.success('WhatsApp conectado com sucesso!');
+          return;
+        }
+        setQrCode(response.data.base64);
+        setQrLoading(false);
+      } catch (error) {
+        console.error('Error fetching QR code:', error);
+        setQrLoading(false);
+      }
+    };
+
+    await fetchQr();
+    pollingRef.current = setInterval(fetchQr, 5000);
+  };
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, []);
 
   return (
     <div className="p-8">
