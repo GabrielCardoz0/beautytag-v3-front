@@ -70,6 +70,9 @@ export default function BotSettings() {
     try {
       await api.put('/bot', {
         is_active: isEnabled,
+        name: botName,
+        behavior,
+        company_description: companyDescription,
         welcome_msg: welcomeMessage,
         out_of_turn_msg: outOfHoursMessage,
         response_time: Number(responseDelay),
