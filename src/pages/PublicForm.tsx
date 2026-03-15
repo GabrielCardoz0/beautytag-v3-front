@@ -153,10 +153,12 @@ const PublicForm = () => {
           whatsapp: personalInfo.whatsapp,
           cep: personalInfo.cep,
         },
-        plan_services: serviceSelections.map(sel => ({
-          id: sel.serviceId,
-          frequency: sel.frequency,
-        })),
+        plan_services: serviceSelections
+          .filter(sel => sel.frequency !== '')
+          .map(sel => ({
+            id: sel.serviceId,
+            frequency: sel.frequency,
+          })),
       };
 
       await axios.post('http://localhost:4000/plans', payload);
