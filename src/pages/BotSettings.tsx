@@ -26,6 +26,9 @@ export default function BotSettings() {
   const [saving, setSaving] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [botName, setBotName] = useState('');
+  const [behavior, setBehavior] = useState('');
+  const [companyDescription, setCompanyDescription] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [responseDelay, setResponseDelay] = useState('2');
   const [businessHoursStart, setBusinessHoursStart] = useState('08:00');
