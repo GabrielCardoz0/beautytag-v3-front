@@ -56,7 +56,7 @@ const PublicForm = () => {
       if (!formId) return;
       
       try {
-        const response = await axios.get<{ forms: ApiForm }>(`http://localhost:4000/forms/${formId}`);
+        const response = await axios.get<{ forms: ApiForm }>(`http://localhost:5000/forms/${formId}`);
         const apiForm = response.data.forms;
         
         if (apiForm) {
@@ -70,9 +70,9 @@ const PublicForm = () => {
               uniqueServices.push(apiServiceToService(opt.options));
             }
             opt.forms_options_secondary_options?.forEach(secOpt => {
-              const serviceId = secOpt.secondary_option?.id;
+              const serviceId = secOpt.options?.id;
               if (serviceId && !uniqueServices.find(s => s.id === serviceId)) {
-                uniqueServices.push(apiServiceToService(secOpt.secondary_option));
+                uniqueServices.push(apiServiceToService(secOpt.options));
               }
             });
           });
@@ -161,7 +161,7 @@ const PublicForm = () => {
           })),
       };
 
-      await axios.post('http://localhost:4000/plans', payload);
+      await axios.post('http://localhost:5000/plans', payload);
       setCurrentStep(6);
     } catch (error) {
       console.error('Error submitting plan:', error);

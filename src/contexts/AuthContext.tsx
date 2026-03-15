@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // 1. Fazer login e obter token
-      const loginResponse = await axios.post<{ token: string }>('http://localhost:4000/auth/login', {
+      const loginResponse = await axios.post<{ token: string }>('http://localhost:5000/auth/login', {
         email,
         password,
       });
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('platai-token', token);
 
       // 2. Buscar dados completos do usuário
-      const userResponse = await axios.get<ApiUserResponse>('http://localhost:4000/users/me', {
+      const userResponse = await axios.get<ApiUserResponse>('http://localhost:5000/users/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

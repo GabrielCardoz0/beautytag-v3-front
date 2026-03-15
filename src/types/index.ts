@@ -109,7 +109,7 @@ export interface ApiFormSecondaryOption {
   updated_at: string;
   form_option_id: number;
   service_id: number;
-  secondary_option: ApiService;
+  options: ApiService;
 }
 
 // Tipo da API para opções de formulário
@@ -331,37 +331,37 @@ export function apiServiceToService(apiService: ApiService): Service {
 
 export function apiFormToForm(apiForm: ApiForm): Form {
   return {
-    id: apiForm.id,
-    name: apiForm.name,
-    description: apiForm.description || '',
-    serviceOptions: apiForm.forms_options.map(opt => ({
+    id: apiForm?.id,
+    name: apiForm?.name,
+    description: apiForm?.description || '',
+    serviceOptions: apiForm?.forms_options?.map(opt => ({
       optionId: opt?.id,
-      serviceId: opt.options.id,
-      secondaryOptions: opt.forms_options_secondary_options.map(sec => ({
-        id: sec.id,
-        serviceId: sec.secondary_option?.id,
-      })),
-    })),
-    createdAt: apiForm.created_at,
+      serviceId: opt?.options?.id,
+      secondaryOptions: opt?.forms_options_secondary_options?.map(sec => ({
+        id: sec?.id,
+        serviceId: sec?.options?.id,
+      })) || [],
+    })) || [],
+    createdAt: apiForm?.created_at,
   };
 }
 
 export function apiPartnerToPartner(apiPartner: ApiPartner): Partner {
   return {
-    id: apiPartner.id,
-    name: apiPartner.name,
-    email: apiPartner.email,
-    whatsapp: apiPartner.metadata?.whatsapp || '',
-    cnpj: apiPartner.metadata?.cnpj || '',
-    cep: apiPartner.metadata?.cep || '',
-    street: apiPartner.metadata?.rua || '',
-    number: apiPartner.metadata?.numero || '',
-    neighborhood: apiPartner.metadata?.bairro || '',
-    city: apiPartner.metadata?.cidade || '',
-    state: apiPartner.metadata?.estado || '',
-    confirmed: apiPartner.confirmed,
-    blocked: apiPartner.blocked,
-    services: apiPartner.services.map(apiServiceToService),
-    createdAt: apiPartner.created_at,
+    id: apiPartner?.id,
+    name: apiPartner?.name,
+    email: apiPartner?.email,
+    whatsapp: apiPartner?.metadata?.whatsapp || '',
+    cnpj: apiPartner?.metadata?.cnpj || '',
+    cep: apiPartner?.metadata?.cep || '',
+    street: apiPartner?.metadata?.rua || '',
+    number: apiPartner?.metadata?.numero || '',
+    neighborhood: apiPartner?.metadata?.bairro || '',
+    city: apiPartner?.metadata?.cidade || '',
+    state: apiPartner?.metadata?.estado || '',
+    confirmed: apiPartner?.confirmed,
+    blocked: apiPartner?.blocked,
+    services: apiPartner?.services?.map(apiServiceToService),
+    createdAt: apiPartner?.created_at,
   };
 }
