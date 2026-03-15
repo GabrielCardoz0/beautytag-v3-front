@@ -622,7 +622,7 @@ const PublicForm = () => {
                 <div>
                   <h3 className="font-semibold mb-3">Serviços Selecionados</h3>
                   <div className="space-y-2">
-                    {serviceSelections.map((sel, index) => {
+                    {serviceSelections.filter(sel => sel.frequency !== '').map((sel, index) => {
                       const service = getServiceById(sel.serviceId);
                       if (!service) return null;
                       const frequencyMultiplier = parseInt(sel.frequency.replace('x', ''));

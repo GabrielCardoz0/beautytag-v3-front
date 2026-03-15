@@ -183,7 +183,58 @@ export default function BotSettings() {
             />
           </CardContent>
         </Card>
+        {/* Conexão WhatsApp */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5" />
+              Conexão WhatsApp
+            </CardTitle>
+            <CardDescription>Conecte o bot ao WhatsApp para atendimento automático</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={startWhatsappPolling}>
+              <Smartphone className="h-4 w-4 mr-2" />
+              Conectar WhatsApp
+            </Button>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* WhatsApp QR Code Modal */}
+      <Dialog open={whatsappModalOpen} onOpenChange={(open) => {
+        if (!open) {
+          stopPolling();
+          setWhatsappModalOpen(false);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5" />
+              Conectar WhatsApp
+            </DialogTitle>
+            <DialogDescription>
+              Escaneie o QR Code abaixo com o WhatsApp do seu celular
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4">
+            {qrLoading ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="text-sm text-muted-foreground">Gerando QR Code...</p>
+              </div>
+            ) : qrCode ? (
+              <div className="flex flex-col items-center gap-3">
+                <img src={qrCode} alt="QR Code WhatsApp" className="w-64 h-64" />
+                <p className="text-sm text-muted-foreground">Aguardando conexão...</p>
+              </div>
+            ) : (
+              <p className="text-sm text-destructive">Erro ao carregar QR Code. Tente novamente.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
