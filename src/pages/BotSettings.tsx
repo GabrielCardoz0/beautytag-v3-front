@@ -175,6 +175,49 @@ export default function BotSettings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              Identidade do Bot
+            </CardTitle>
+            <CardDescription>Defina o nome, comportamento e contexto da empresa</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="botName">Nome do Bot</Label>
+              <Input
+                id="botName"
+                value={botName}
+                onChange={(e) => setBotName(e.target.value)}
+                placeholder="Ex: Assistente Virtual"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="behavior">Comportamento</Label>
+              <Textarea
+                id="behavior"
+                value={behavior}
+                onChange={(e) => setBehavior(e.target.value)}
+                placeholder="Descreva como o bot deve se comportar..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Instruções de como o bot deve interagir com os clientes</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyDescription">Descrição da Empresa</Label>
+              <Textarea
+                id="companyDescription"
+                value={companyDescription}
+                onChange={(e) => setCompanyDescription(e.target.value)}
+                placeholder="Descreva a empresa para dar contexto ao bot..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Informações sobre a empresa para o bot utilizar nas respostas</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
               Mensagem de Boas-vindas
             </CardTitle>
