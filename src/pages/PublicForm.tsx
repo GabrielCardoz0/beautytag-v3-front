@@ -126,7 +126,7 @@ const PublicForm = () => {
   };
 
   const isServicesValid = () => {
-    return serviceSelections.every(sel => sel.frequency !== '');
+    return serviceSelections.some(sel => sel.frequency !== '');
   };
 
   const calculateTotal = () => {
@@ -153,10 +153,12 @@ const PublicForm = () => {
           whatsapp: personalInfo.whatsapp,
           cep: personalInfo.cep,
         },
-        plan_services: serviceSelections.map(sel => ({
-          id: sel.serviceId,
-          frequency: sel.frequency,
-        })),
+        plan_services: serviceSelections
+          .filter(sel => sel.frequency !== '')
+          .map(sel => ({
+            id: sel.serviceId,
+            frequency: sel.frequency,
+          })),
       };
 
       await axios.post('http://localhost:4000/plans', payload);
@@ -620,7 +622,7 @@ const PublicForm = () => {
                 <div>
                   <h3 className="font-semibold mb-3">Serviços Selecionados</h3>
                   <div className="space-y-2">
-                    {serviceSelections.map((sel, index) => {
+                    {serviceSelections.filter(sel => sel.frequency !== '').map((sel, index) => {
                       const service = getServiceById(sel.serviceId);
                       if (!service) return null;
                       const frequencyMultiplier = parseInt(sel.frequency.replace('x', ''));
