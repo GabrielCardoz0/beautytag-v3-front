@@ -126,7 +126,7 @@ const PublicForm = () => {
   };
 
   const isServicesValid = () => {
-    return serviceSelections.every(sel => sel.frequency !== '');
+    return serviceSelections.some(sel => sel.frequency !== '');
   };
 
   const calculateTotal = () => {
