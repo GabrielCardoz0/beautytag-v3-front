@@ -110,12 +110,22 @@ export const partnersApi = {
       metadata?: {
         cnpj?: string;
         whatsapp?: string;
+        company_name?: string;
+        trading_name?: string;
+        annual_revenue?: number;
         cep?: string;
         rua?: string;
         numero?: string;
         bairro?: string;
         cidade?: string;
         estado?: string;
+        holder_name?: string;
+        holder_document?: string;
+        bank?: string;
+        branch_number?: string;
+        account_number?: string;
+        account_check_digit?: string;
+        account_type?: string;
       };
     }
   ): Promise<Partner> => {

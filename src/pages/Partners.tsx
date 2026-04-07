@@ -37,16 +37,7 @@ export default function Partners() {
   const handleSavePartner = async (partnerData: {
     name: string;
     email: string;
-    metadata: {
-      cnpj: string;
-      whatsapp: string;
-      cep: string;
-      rua: string;
-      numero: string;
-      bairro: string;
-      cidade: string;
-      estado: string;
-    };
+    metadata: Record<string, any>;
   }) => {
     try {
       await partnersApi.create(partnerData);
