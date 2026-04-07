@@ -34,20 +34,7 @@ export default function Partners() {
     loadPartners();
   }, []);
 
-  const handleSavePartner = async (partnerData: {
-    name: string;
-    email: string;
-    metadata: {
-      cnpj: string;
-      whatsapp: string;
-      cep: string;
-      rua: string;
-      numero: string;
-      bairro: string;
-      cidade: string;
-      estado: string;
-    };
-  }) => {
+  const handleSavePartner = async (partnerData: Parameters<typeof partnersApi.create>[0]) => {
     try {
       await partnersApi.create(partnerData);
       await loadPartners();
