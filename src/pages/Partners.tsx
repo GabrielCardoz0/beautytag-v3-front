@@ -34,11 +34,7 @@ export default function Partners() {
     loadPartners();
   }, []);
 
-  const handleSavePartner = async (partnerData: {
-    name: string;
-    email: string;
-    metadata: Record<string, any>;
-  }) => {
+  const handleSavePartner = async (partnerData: Parameters<typeof partnersApi.create>[0]) => {
     try {
       await partnersApi.create(partnerData);
       await loadPartners();
