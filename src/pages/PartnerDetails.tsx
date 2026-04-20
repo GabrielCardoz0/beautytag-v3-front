@@ -32,6 +32,7 @@ interface EditData {
   neighborhood: string;
   city: string;
   state: string;
+  pagarme_id: string;
 }
 
 export default function PartnerDetails() {
