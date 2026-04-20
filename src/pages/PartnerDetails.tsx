@@ -62,6 +62,7 @@ export default function PartnerDetails() {
           neighborhood: data.neighborhood,
           city: data.city,
           state: data.state,
+          pagarme_id: data.pagarme_id || '',
         });
       }
     } catch (error) {
@@ -89,6 +90,7 @@ export default function PartnerDetails() {
         neighborhood: partner.neighborhood,
         city: partner.city,
         state: partner.state,
+        pagarme_id: partner.pagarme_id || '',
       });
       setIsEditing(true);
     }
@@ -107,6 +109,7 @@ export default function PartnerDetails() {
         neighborhood: partner.neighborhood,
         city: partner.city,
         state: partner.state,
+        pagarme_id: partner.pagarme_id || '',
       });
     }
     setIsEditing(false);
@@ -129,6 +132,7 @@ export default function PartnerDetails() {
           bairro: editData.neighborhood,
           cidade: editData.city,
           estado: editData.state,
+          ...(editData.pagarme_id ? { pagarme_id: editData.pagarme_id } : {}),
         },
       });
       await loadPartner();
@@ -341,6 +345,14 @@ export default function PartnerDetails() {
                       onChange={(e) => handleChange('state', e.target.value)}
                       placeholder="UF"
                       maxLength={2}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Pagar.me ID (opcional)</Label>
+                    <Input
+                      value={editData?.pagarme_id || ''}
+                      onChange={(e) => handleChange('pagarme_id', e.target.value)}
+                      placeholder="rcv_xxxxxxxxxxxxxxxxxx"
                     />
                   </div>
                 </div>
