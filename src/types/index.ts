@@ -320,8 +320,8 @@ export function apiServiceToService(apiService: ApiService): Service {
     description: apiService.description,
     price: apiService.price / 100, // converte centavos para reais
     spentTime: apiService.spent_time,
-    repassePercent: apiService.percent_repasse,
-    colaboradorPercent: apiService.percent_colab,
+    percentTax: apiService.percent_tax ?? 0,
+    lucro: (apiService.lucro ?? 0) / 100,
     gender: apiService.genre,
     isActive: apiService.is_active,
     createdAt: apiService.created_at,
