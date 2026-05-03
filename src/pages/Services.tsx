@@ -44,10 +44,7 @@ export default function Services() {
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
     user_id?: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
+    percent_tax?: number;
     lucro?: number;
   }) => {
     try {
@@ -58,10 +55,7 @@ export default function Services() {
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
         user_id: serviceData.user_id,
-        percent_colab: serviceData.percent_colab,
-        percent_repasse: serviceData.percent_repasse,
-        preco_parceiro: serviceData.preco_parceiro,
-        preco_colab: serviceData.preco_colab,
+        percent_tax: serviceData.percent_tax,
         lucro: serviceData.lucro,
       });
       toast.success('Serviço cadastrado com sucesso!');
@@ -78,10 +72,7 @@ export default function Services() {
     price: number;
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
+    percent_tax?: number;
     lucro?: number;
   }) => {
     try {
@@ -91,10 +82,7 @@ export default function Services() {
         price: serviceData.price,
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
-        percent_colab: serviceData.percent_colab,
-        percent_repasse: serviceData.percent_repasse,
-        preco_parceiro: serviceData.preco_parceiro,
-        preco_colab: serviceData.preco_colab,
+        percent_tax: serviceData.percent_tax,
         lucro: serviceData.lucro,
       });
       toast.success('Serviço atualizado com sucesso!');
