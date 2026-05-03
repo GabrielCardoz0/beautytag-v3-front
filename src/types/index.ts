@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'partner' | 'parceiro';
+export type UserRole = 'admin' | 'partner' | 'parceiro' | 'colaborador';
 
 // Tipo da API para metadata do parceiro
 export interface ApiPartnerMetadata {
