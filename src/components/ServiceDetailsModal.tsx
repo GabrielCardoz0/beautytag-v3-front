@@ -33,20 +33,18 @@ export function ServiceDetailsModal({
   onEdit, 
   onDelete 
 }: ServiceDetailsModalProps) {
-  const calculations = useMemo(() => {
-    if (!service) return { precoColaborador: '0,00', precoParceiro: '0,00', lucro: '0,00' };
-    
-    const price = service.price;
-    const precoColaborador = price * (service.colaboradorPercent / 100);
-    const precoParceiro = price * (service.repassePercent / 100);
-    const lucro = price - precoColaborador - precoParceiro;
+  const { user } = useAuth();
+  const isCollaborator = user?.role === 'colaborador';
 
+  const calculations = useMemo(() => {
+    if (!service) return { lucro: '0,00', displayPrice: 0 };
+    const lucro = service.price * (service.percentTax / 100);
+    const displayPrice = isCollaborator ? service.price - service.percentTax : service.price;
     return {
-      precoColaborador: formatCurrency(precoColaborador),
-      precoParceiro: formatCurrency(precoParceiro),
       lucro: formatCurrency(lucro),
+      displayPrice,
     };
-  }, [service]);
+  }, [service, isCollaborator]);
 
   const getGenderLabel = (gender: string) => {
     switch (gender) {
