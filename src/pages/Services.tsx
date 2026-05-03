@@ -10,6 +10,7 @@ import { Service } from '@/types';
 import { servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
