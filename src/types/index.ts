@@ -58,10 +58,7 @@ export interface ApiService {
   description: string;
   genre: 'masculino' | 'feminino' | 'unissex';
   price: number; // em centavos (1200 = R$ 12,00)
-  percent_colab: number;
-  percent_repasse: number;
-  preco_colab: number;
-  preco_parceiro: number;
+  percent_tax: number;
   lucro: number;
   is_active: boolean;
   is_complete: boolean;
