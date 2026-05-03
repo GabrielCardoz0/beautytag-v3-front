@@ -263,10 +263,12 @@ export default function Services() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-foreground">R$ {formatCurrency(service.price)}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Rep: {service.repassePercent}% | Col: {service.colaboradorPercent}%
-                      </p>
+                      <p className="font-bold text-foreground">R$ {formatCurrency(getDisplayPrice(service))}</p>
+                      {!isCollaborator && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Taxa: {service.percentTax}%
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
