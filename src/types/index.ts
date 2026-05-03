@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'partner' | 'parceiro';
+export type UserRole = 'admin' | 'partner' | 'parceiro' | 'colaborador';
 
 // Tipo da API para metadata do parceiro
 export interface ApiPartnerMetadata {
@@ -58,10 +58,7 @@ export interface ApiService {
   description: string;
   genre: 'masculino' | 'feminino' | 'unissex';
   price: number; // em centavos (1200 = R$ 12,00)
-  percent_colab: number;
-  percent_repasse: number;
-  preco_colab: number;
-  preco_parceiro: number;
+  percent_tax: number;
   lucro: number;
   is_active: boolean;
   is_complete: boolean;
@@ -74,8 +71,8 @@ export interface Service {
   description: string;
   price: number; // em reais (12.00 = R$ 12,00)
   spentTime: number;
-  repassePercent: number;
-  colaboradorPercent: number;
+  percentTax: number;
+  lucro: number;
   gender: 'masculino' | 'feminino' | 'unissex';
   isActive: boolean;
   createdAt: string;
@@ -323,8 +320,8 @@ export function apiServiceToService(apiService: ApiService): Service {
     description: apiService.description,
     price: apiService.price / 100, // converte centavos para reais
     spentTime: apiService.spent_time,
-    repassePercent: apiService.percent_repasse,
-    colaboradorPercent: apiService.percent_colab,
+    percentTax: apiService.percent_tax ?? 0,
+    lucro: (apiService.lucro ?? 0) / 100,
     gender: apiService.genre,
     isActive: apiService.is_active,
     createdAt: apiService.created_at,

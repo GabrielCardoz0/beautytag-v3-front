@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Service } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServiceDetailsModalProps {
   open: boolean;
@@ -32,20 +33,18 @@ export function ServiceDetailsModal({
   onEdit, 
   onDelete 
 }: ServiceDetailsModalProps) {
-  const calculations = useMemo(() => {
-    if (!service) return { precoColaborador: '0,00', precoParceiro: '0,00', lucro: '0,00' };
-    
-    const price = service.price;
-    const precoColaborador = price * (service.colaboradorPercent / 100);
-    const precoParceiro = price * (service.repassePercent / 100);
-    const lucro = price - precoColaborador - precoParceiro;
+  const { user } = useAuth();
+  const isCollaborator = user?.role === 'colaborador';
 
+  const calculations = useMemo(() => {
+    if (!service) return { lucro: '0,00', displayPrice: 0 };
+    const lucro = service.price * (service.percentTax / 100);
+    const displayPrice = isCollaborator ? service.price - service.percentTax : service.price;
     return {
-      precoColaborador: formatCurrency(precoColaborador),
-      precoParceiro: formatCurrency(precoParceiro),
       lucro: formatCurrency(lucro),
+      displayPrice,
     };
-  }, [service]);
+  }, [service, isCollaborator]);
 
   const getGenderLabel = (gender: string) => {
     switch (gender) {
@@ -123,29 +122,25 @@ export function ServiceDetailsModal({
 
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-muted-foreground">Preço Base</span>
-              <span className="text-2xl font-bold text-foreground">R$ {formatCurrency(service.price)}</span>
+              <span className="text-muted-foreground">{isCollaborator ? 'Preço' : 'Preço Base'}</span>
+              <span className="text-2xl font-bold text-foreground">R$ {formatCurrency(calculations.displayPrice)}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Repasse</p>
-                <p className="text-lg font-semibold">{service.repassePercent}%</p>
-                <p className="text-sm text-muted-foreground">R$ {calculations.precoParceiro}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Colaborador</p>
-                <p className="text-lg font-semibold">{service.colaboradorPercent}%</p>
-                <p className="text-sm text-muted-foreground">R$ {calculations.precoColaborador}</p>
-              </div>
-            </div>
+            {!isCollaborator && (
+              <>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Taxa</p>
+                  <p className="text-lg font-semibold">{service.percentTax}%</p>
+                </div>
 
-            <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
-              <div className="flex justify-between items-center">
-                <span className="text-green-700 dark:text-green-400 font-medium">Lucro</span>
-                <span className="text-xl font-bold text-green-700 dark:text-green-400">R$ {calculations.lucro}</span>
-              </div>
-            </div>
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+                  <div className="flex justify-between items-center">
+                    <span className="text-green-700 dark:text-green-400 font-medium">Lucro</span>
+                    <span className="text-xl font-bold text-green-700 dark:text-green-400">R$ {calculations.lucro}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="text-xs text-muted-foreground pt-2 border-t">

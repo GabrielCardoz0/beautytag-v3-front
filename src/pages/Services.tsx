@@ -10,8 +10,11 @@ import { Service } from '@/types';
 import { servicesApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Services() {
+  const { user } = useAuth();
+  const isCollaborator = user?.role === 'colaborador';
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +22,9 @@ export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+
+  const getDisplayPrice = (service: Service) =>
+    isCollaborator ? service.price - service.percentTax : service.price;
 
   useEffect(() => {
     loadServices();
@@ -44,10 +50,7 @@ export default function Services() {
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
     user_id?: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
+    percent_tax?: number;
     lucro?: number;
   }) => {
     try {
@@ -58,10 +61,7 @@ export default function Services() {
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
         user_id: serviceData.user_id,
-        percent_colab: serviceData.percent_colab,
-        percent_repasse: serviceData.percent_repasse,
-        preco_parceiro: serviceData.preco_parceiro,
-        preco_colab: serviceData.preco_colab,
+        percent_tax: serviceData.percent_tax,
         lucro: serviceData.lucro,
       });
       toast.success('Serviço cadastrado com sucesso!');
@@ -78,10 +78,7 @@ export default function Services() {
     price: number;
     gender: 'masculino' | 'feminino' | 'unissex';
     spentTime: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
+    percent_tax?: number;
     lucro?: number;
   }) => {
     try {
@@ -91,10 +88,7 @@ export default function Services() {
         price: serviceData.price,
         genre: serviceData.gender,
         spent_time: serviceData.spentTime,
-        percent_colab: serviceData.percent_colab,
-        percent_repasse: serviceData.percent_repasse,
-        preco_parceiro: serviceData.preco_parceiro,
-        preco_colab: serviceData.preco_colab,
+        percent_tax: serviceData.percent_tax,
         lucro: serviceData.lucro,
       });
       toast.success('Serviço atualizado com sucesso!');
@@ -197,8 +191,9 @@ export default function Services() {
                   <th className="text-left p-4 font-medium text-muted-foreground">Serviço</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">Gênero</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">Duração</th>
-                  <th className="text-right p-4 font-medium text-muted-foreground">Repasse</th>
-                  <th className="text-right p-4 font-medium text-muted-foreground">Colaborador</th>
+                  {!isCollaborator && (
+                    <th className="text-right p-4 font-medium text-muted-foreground">Taxa</th>
+                  )}
                   <th className="text-right p-4 font-medium text-muted-foreground">Preço</th>
                 </tr>
               </thead>
@@ -230,11 +225,12 @@ export default function Services() {
                       </Badge>
                     </td>
                     <td className="p-4 text-muted-foreground">{service.spentTime} min</td>
-                    <td className="p-4 text-right text-muted-foreground">{service.repassePercent}%</td>
-                    <td className="p-4 text-right text-muted-foreground">{service.colaboradorPercent}%</td>
+                    {!isCollaborator && (
+                      <td className="p-4 text-right text-muted-foreground">{service.percentTax}%</td>
+                    )}
                     <td className="p-4 text-right">
                       <span className="font-bold text-foreground">
-                        R$ {formatCurrency(service.price)}
+                        R$ {formatCurrency(getDisplayPrice(service))}
                       </span>
                     </td>
                   </tr>
@@ -267,10 +263,12 @@ export default function Services() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-foreground">R$ {formatCurrency(service.price)}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Rep: {service.repassePercent}% | Col: {service.colaboradorPercent}%
-                      </p>
+                      <p className="font-bold text-foreground">R$ {formatCurrency(getDisplayPrice(service))}</p>
+                      {!isCollaborator && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Taxa: {service.percentTax}%
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>

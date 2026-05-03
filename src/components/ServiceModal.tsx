@@ -12,44 +12,32 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
+interface ServicePayload {
+  name: string;
+  description: string;
+  price: number;
+  gender: 'masculino' | 'feminino' | 'unissex';
+  spentTime: number;
+  user_id?: number;
+  percent_tax?: number;
+  lucro?: number;
+}
+
 interface ServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (service: {
-    name: string;
-    description: string;
-    price: number;
-    gender: 'masculino' | 'feminino' | 'unissex';
-    spentTime: number;
-    user_id?: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
-    lucro?: number;
-  }) => void;
-  onUpdate?: (id: number, service: {
-    name: string;
-    description: string;
-    price: number;
-    gender: 'masculino' | 'feminino' | 'unissex';
-    spentTime: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
-    lucro?: number;
-  }) => void;
+  onSave: (service: ServicePayload) => void;
+  onUpdate?: (id: number, service: Omit<ServicePayload, 'user_id'>) => void;
   editingService?: Service | null;
 }
 
 export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingService }: ServiceModalProps) {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  
+
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -57,17 +45,12 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
     spentTime: '30',
     gender: '' as 'masculino' | 'feminino' | 'unissex' | '',
     user_id: '',
-    percent_colab: '0',
-    percent_repasse: '0',
+    percent_tax: '0',
   });
 
   const price = parseFloat(formData.price) || 0;
-  const percentColab = (parseFloat(formData.percent_colab) || 0) / 100;
-  const percentRepasse = (parseFloat(formData.percent_repasse) || 0) / 100;
-  
-  const collaboratorPrice = price - (price * percentColab);
-  const partnerPrice = collaboratorPrice * (1 - percentRepasse);
-  const profit = collaboratorPrice * percentRepasse;
+  const percentTax = parseFloat(formData.percent_tax) || 0;
+  const profit = price * (percentTax / 100);
 
   useEffect(() => {
     if (open && isAdmin && !editingService) {
@@ -84,8 +67,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
         spentTime: editingService.spentTime.toString(),
         gender: editingService.gender,
         user_id: '',
-        percent_colab: editingService.colaboradorPercent?.toString() || '0',
-        percent_repasse: editingService.repassePercent?.toString() || '0',
+        percent_tax: editingService.percentTax?.toString() || '0',
       });
     } else {
       resetForm();
@@ -113,8 +95,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
       spentTime: '30',
       gender: '',
       user_id: '',
-      percent_colab: '0',
-      percent_repasse: '0',
+      percent_tax: '0',
     });
   };
 
@@ -124,7 +105,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.price || !formData.gender) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
@@ -147,10 +128,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
       if (isAdmin) {
         onUpdate(editingService.id, {
           ...baseServiceData,
-          percent_colab: parseFloat(formData.percent_colab) || 0,
-          percent_repasse: parseFloat(formData.percent_repasse) || 0,
-          preco_parceiro: partnerPrice,
-          preco_colab: collaboratorPrice,
+          percent_tax: percentTax,
           lucro: profit,
         });
       } else {
@@ -161,10 +139,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
         onSave({
           ...baseServiceData,
           user_id: parseInt(formData.user_id),
-          percent_colab: parseFloat(formData.percent_colab) || 0,
-          percent_repasse: parseFloat(formData.percent_repasse) || 0,
-          preco_parceiro: partnerPrice,
-          preco_colab: collaboratorPrice,
+          percent_tax: percentTax,
           lucro: profit,
         });
       } else {
@@ -279,49 +254,25 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
             {showFinancialPanel && (
               <div className="md:w-72 md:border-l md:pl-6 mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
                 <h4 className="text-sm font-medium text-muted-foreground mb-4">Configurações Financeiras</h4>
-                
-                <div className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="percent_colab">% Colaborador</Label>
-                      <Input
-                        id="percent_colab"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={formData.percent_colab}
-                        onChange={(e) => handleChange('percent_colab', e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="percent_repasse">% Repasse</Label>
-                      <Input
-                        id="percent_repasse"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={formData.percent_repasse}
-                        onChange={(e) => handleChange('percent_repasse', e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="percent_tax">% Taxa</Label>
+                    <Input
+                      id="percent_tax"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.percent_tax}
+                      onChange={(e) => handleChange('percent_tax', e.target.value)}
+                      placeholder="0"
+                    />
                   </div>
 
                   <div className="pt-4 border-t border-border">
                     <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide">Valores Calculados</p>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span className="text-sm text-muted-foreground">Preço Colaborador</span>
-                        <span className="font-medium text-foreground">R$ {formatCurrency(collaboratorPrice)}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span className="text-sm text-muted-foreground">Preço Parceiro</span>
-                        <span className="font-medium text-foreground">R$ {formatCurrency(partnerPrice)}</span>
-                      </div>
                       <div className="flex justify-between items-center p-2 bg-primary/10 rounded">
                         <span className="text-sm font-medium text-primary">Lucro</span>
                         <span className="font-bold text-primary">R$ {formatCurrency(profit)}</span>
