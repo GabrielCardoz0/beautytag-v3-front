@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Service } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServiceDetailsModalProps {
   open: boolean;
