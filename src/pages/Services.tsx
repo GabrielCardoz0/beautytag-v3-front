@@ -13,6 +13,8 @@ import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Services() {
+  const { user } = useAuth();
+  const isCollaborator = user?.role === 'colaborador';
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +22,9 @@ export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+
+  const getDisplayPrice = (service: Service) =>
+    isCollaborator ? service.price - service.percentTax : service.price;
 
   useEffect(() => {
     loadServices();
