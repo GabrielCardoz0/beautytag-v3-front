@@ -71,8 +71,8 @@ export interface Service {
   description: string;
   price: number; // em reais (12.00 = R$ 12,00)
   spentTime: number;
-  repassePercent: number;
-  colaboradorPercent: number;
+  percentTax: number;
+  lucro: number;
   gender: 'masculino' | 'feminino' | 'unissex';
   isActive: boolean;
   createdAt: string;
