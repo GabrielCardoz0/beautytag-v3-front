@@ -120,10 +120,7 @@ export const servicesApi = {
     genre: string;
     spent_time: number;
     user_id?: number;
-    percent_colab?: number;
-    percent_repasse?: number;
-    preco_parceiro?: number;
-    preco_colab?: number;
+    percent_tax?: number;
     lucro?: number;
   }): Promise<Service> => {
     const payload: any = {
@@ -134,16 +131,8 @@ export const servicesApi = {
       spent_time: data.spent_time,
     };
 
-    // Campos adicionais para admin
     if (data.user_id !== undefined) payload.user_id = data.user_id;
-    if (data.percent_colab !== undefined)
-      payload.percent_colab = data.percent_colab;
-    if (data.percent_repasse !== undefined)
-      payload.percent_repasse = data.percent_repasse;
-    if (data.preco_parceiro !== undefined)
-      payload.preco_parceiro = Math.round(data.preco_parceiro * 100);
-    if (data.preco_colab !== undefined)
-      payload.preco_colab = Math.round(data.preco_colab * 100);
+    if (data.percent_tax !== undefined) payload.percent_tax = data.percent_tax;
     if (data.lucro !== undefined) payload.lucro = Math.round(data.lucro * 100);
 
     const response = await api.post<{ service: ApiService }>(
@@ -162,22 +151,13 @@ export const servicesApi = {
       genre?: string;
       spent_time?: number;
       is_active?: boolean;
-      percent_colab?: number;
-      percent_repasse?: number;
-      preco_parceiro?: number;
-      preco_colab?: number;
+      percent_tax?: number;
       lucro?: number;
     }
   ): Promise<Service> => {
     const payload: any = { ...data };
     if (data.price !== undefined) {
       payload.price = Math.round(data.price * 100);
-    }
-    if (data.preco_parceiro !== undefined) {
-      payload.preco_parceiro = Math.round(data.preco_parceiro * 100);
-    }
-    if (data.preco_colab !== undefined) {
-      payload.preco_colab = Math.round(data.preco_colab * 100);
     }
     if (data.lucro !== undefined) {
       payload.lucro = Math.round(data.lucro * 100);
