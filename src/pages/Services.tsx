@@ -191,8 +191,9 @@ export default function Services() {
                   <th className="text-left p-4 font-medium text-muted-foreground">Serviço</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">Gênero</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">Duração</th>
-                  <th className="text-right p-4 font-medium text-muted-foreground">Repasse</th>
-                  <th className="text-right p-4 font-medium text-muted-foreground">Colaborador</th>
+                  {!isCollaborator && (
+                    <th className="text-right p-4 font-medium text-muted-foreground">Taxa</th>
+                  )}
                   <th className="text-right p-4 font-medium text-muted-foreground">Preço</th>
                 </tr>
               </thead>
@@ -224,11 +225,12 @@ export default function Services() {
                       </Badge>
                     </td>
                     <td className="p-4 text-muted-foreground">{service.spentTime} min</td>
-                    <td className="p-4 text-right text-muted-foreground">{service.repassePercent}%</td>
-                    <td className="p-4 text-right text-muted-foreground">{service.colaboradorPercent}%</td>
+                    {!isCollaborator && (
+                      <td className="p-4 text-right text-muted-foreground">{service.percentTax}%</td>
+                    )}
                     <td className="p-4 text-right">
                       <span className="font-bold text-foreground">
-                        R$ {formatCurrency(service.price)}
+                        R$ {formatCurrency(getDisplayPrice(service))}
                       </span>
                     </td>
                   </tr>
