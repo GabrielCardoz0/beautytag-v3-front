@@ -10,7 +10,6 @@ export interface ApiPartnerMetadata {
   bairro?: string;
   cidade?: string;
   estado?: string;
-  pagarme_id?: string;
 }
 
 // Tipo da API para parceiro (usuário com role parceiro)
@@ -23,6 +22,7 @@ export interface ApiPartner {
   confirmed: boolean;
   blocked: boolean;
   role: 'parceiro';
+  pagarme_id?: string | null;
   metadata: ApiPartnerMetadata | null;
   services: ApiService[];
 }
@@ -358,7 +358,7 @@ export function apiPartnerToPartner(apiPartner: ApiPartner): Partner {
     neighborhood: apiPartner?.metadata?.bairro || '',
     city: apiPartner?.metadata?.cidade || '',
     state: apiPartner?.metadata?.estado || '',
-    pagarme_id: apiPartner?.metadata?.pagarme_id || '',
+    pagarme_id: apiPartner?.pagarme_id || '',
     confirmed: apiPartner?.confirmed,
     blocked: apiPartner?.blocked,
     services: apiPartner?.services?.map(apiServiceToService),
