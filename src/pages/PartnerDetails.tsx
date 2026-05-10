@@ -123,6 +123,7 @@ export default function PartnerDetails() {
       await partnersApi.update(Number(id), {
         name: editData.name,
         email: editData.email,
+        ...(editData.pagarme_id ? { pagarme_id: editData.pagarme_id } : {}),
         metadata: {
           cnpj: editData.cnpj,
           whatsapp: editData.whatsapp,
@@ -132,7 +133,6 @@ export default function PartnerDetails() {
           bairro: editData.neighborhood,
           cidade: editData.city,
           estado: editData.state,
-          ...(editData.pagarme_id ? { pagarme_id: editData.pagarme_id } : {}),
         },
       });
       await loadPartner();

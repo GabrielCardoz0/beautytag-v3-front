@@ -88,6 +88,7 @@ export const partnersApi = {
     data: {
       name?: string;
       email?: string;
+      pagarme_id?: string;
       metadata?: Record<string, any>;
     }
   ): Promise<Partner> => {
