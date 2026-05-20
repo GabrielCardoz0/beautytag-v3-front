@@ -10,6 +10,7 @@ import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm 
 import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import { formatCurrency } from '@/lib/utils';
+import { API_BASE_URL } from '@/lib/api';
 
 interface PersonalInfo {
   nome: string;
@@ -56,7 +57,7 @@ const PublicForm = () => {
       if (!formId) return;
       
       try {
-        const response = await axios.get<{ forms: ApiForm }>(`http://localhost:5000/forms/${formId}`);
+        const response = await axios.get<{ forms: ApiForm }>(`${API_BASE_URL}/forms/${formId}`);
         const apiForm = response.data.forms;
         
         if (apiForm) {
@@ -161,7 +162,7 @@ const PublicForm = () => {
           })),
       };
 
-      await axios.post('http://localhost:5000/plans', payload);
+      await axios.post(`${API_BASE_URL}/plans`, payload);
       setCurrentStep(6);
     } catch (error) {
       console.error('Error submitting plan:', error);
