@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole } from '@/types';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 
 interface ApiUserResponse {
   user: {
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // 1. Fazer login e obter token
-      const loginResponse = await axios.post<{ token: string }>('http://localhost:5000/auth/login', {
+      const loginResponse = await axios.post<{ token: string }>(`${API_BASE_URL}/auth/login`, {
         email,
         password,
       });
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('platai-token', token);
 
       // 2. Buscar dados completos do usuário
-      const userResponse = await axios.get<ApiUserResponse>('http://localhost:5000/users/me', {
+      const userResponse = await axios.get<ApiUserResponse>(`${API_BASE_URL}/users/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -18,8 +18,10 @@ import {
 } from "@/types";
 
 // Configuração base do axios
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -186,7 +188,7 @@ export const formsApi = {
   getById: async (id: number): Promise<Form | null> => {
     try {
       const response = await axios.get<{ forms: ApiForm }>(
-        `http://localhost:5000/forms/${id}`
+        `${API_BASE_URL}/forms/${id}`
       );
       return apiFormToForm(response.data.forms);
     } catch (error) {
