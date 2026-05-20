@@ -418,6 +418,7 @@ const PublicForm = () => {
                 <div className="space-y-2">
                   <Label htmlFor="empresa">Empresa</Label>
                   <Input
+                    required
                     id="empresa"
                     value={personalInfo.empresa}
                     onChange={(e) => handlePersonalInfoChange('empresa', e.target.value)}
