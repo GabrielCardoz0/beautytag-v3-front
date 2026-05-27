@@ -74,10 +74,6 @@ export default function Login() {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="text-xs text-muted-foreground text-center mt-4 space-y-1">
-            <p><strong>Admin:</strong> joao@example.com / 123456</p>
-            <p><strong>Parceiro:</strong> maria@example.com / 123456</p>
-          </div>
         </CardContent>
       </Card>
     </div>
