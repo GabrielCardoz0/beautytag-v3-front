@@ -123,7 +123,7 @@ const PublicForm = () => {
 
   const isPersonalInfoValid = () => {
     return personalInfo.nome && personalInfo.email && personalInfo.cpf && 
-           personalInfo.genero && personalInfo.whatsapp && personalInfo.dataNascimento && personalInfo.cep;
+           personalInfo.genero && personalInfo.whatsapp && personalInfo.dataNascimento && personalInfo.cep && personalInfo.empresa;
   };
 
   const isServicesValid = () => {
@@ -419,11 +419,10 @@ const PublicForm = () => {
                 <div className="space-y-2">
                   <Label htmlFor="empresa">Empresa</Label>
                   <Input
-                    required
                     id="empresa"
                     value={personalInfo.empresa}
                     onChange={(e) => handlePersonalInfoChange('empresa', e.target.value)}
-                    placeholder="Nome da empresa (opcional)"
+                    placeholder="Nome da empresa"
                   />
                 </div>
                 <div className="space-y-2">

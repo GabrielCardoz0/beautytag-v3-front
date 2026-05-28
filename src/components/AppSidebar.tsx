@@ -47,7 +47,7 @@ export function AppSidebar() {
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-xl">B</span>
           </div>
-          <span className="text-xl font-bold text-sidebar-foreground">BEAUTY TAG</span>
+          <span className="text-xl font-bold text-sidebar-foreground">BEAUTYTAG</span>
         </div>
       </SidebarHeader>
 
