@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone, Loader2 } from 'lucide-react';
+import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone, Loader2, Unlink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,30 +38,32 @@ export default function BotSettings() {
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const fetchBot = async () => {
+    try {
+      const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; name: string; behavior: string; company_description: string; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
+      const bot = response.data.bot;
+      setIsEnabled(bot.is_active);
+      setIsConnected(bot.is_connected);
+      setBotName(bot.name || '');
+      setBehavior(bot.behavior || '');
+      setCompanyDescription(bot.company_description || '');
+      setWelcomeMessage(bot.welcome_msg);
+      setOutOfHoursMessage(bot.out_of_turn_msg);
+      setResponseDelay(String(bot.response_time));
+      setBusinessHoursStart(minutesToTime(bot.start_time));
+      setBusinessHoursEnd(minutesToTime(bot.end_time));
+    } catch (error) {
+      console.error('Error fetching bot settings:', error);
+      toast.error('Erro ao carregar configurações do bot');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBot = async () => {
-      try {
-        const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; name: string; behavior: string; company_description: string; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
-        const bot = response.data.bot;
-        setIsEnabled(bot.is_active);
-        setIsConnected(bot.is_connected);
-        setBotName(bot.name || '');
-        setBehavior(bot.behavior || '');
-        setCompanyDescription(bot.company_description || '');
-        setWelcomeMessage(bot.welcome_msg);
-        setOutOfHoursMessage(bot.out_of_turn_msg);
-        setResponseDelay(String(bot.response_time));
-        setBusinessHoursStart(minutesToTime(bot.start_time));
-        setBusinessHoursEnd(minutesToTime(bot.end_time));
-      } catch (error) {
-        console.error('Error fetching bot settings:', error);
-        toast.error('Erro ao carregar configurações do bot');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBot();
   }, []);
 
@@ -113,6 +115,20 @@ export default function BotSettings() {
 
     await fetchQr();
     pollingRef.current = setInterval(fetchQr, 5000);
+  };
+
+  const handleDisconnectWhatsApp = async () => {
+    setDisconnecting(true);
+    try {
+      await api.delete('/evolution/instance');
+      toast.success('WhatsApp desconectado com sucesso!');
+      await fetchBot();
+    } catch (error) {
+      console.error('Error disconnecting WhatsApp:', error);
+      toast.error('Erro ao desconectar WhatsApp');
+    } finally {
+      setDisconnecting(false);
+    }
   };
 
   const stopPolling = () => {
@@ -308,7 +324,21 @@ export default function BotSettings() {
                 {isConnected ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
               </Button>
               {isConnected && (
-                <span className="text-sm text-green-600 font-medium">● Conectado</span>
+                <>
+                  <span className="text-sm text-green-600 font-medium">● Conectado</span>
+                  <Button
+                    onClick={handleDisconnectWhatsApp}
+                    variant="destructive"
+                    disabled={disconnecting}
+                  >
+                    {disconnecting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Unlink className="h-4 w-4 mr-2" />
+                    )}
+                    Desconectar
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
