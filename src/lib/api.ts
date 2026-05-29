@@ -378,6 +378,10 @@ export const plansApi = {
     return response.data.plans.map(apiPlanToPlan);
   },
 
+  delete: async (planId: number): Promise<void> => {
+    await api.delete(`/plans/${planId}`);
+  },
+
   addService: async (
     planId: number,
     serviceId: number,
