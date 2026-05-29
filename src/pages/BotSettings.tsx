@@ -38,6 +38,7 @@ export default function BotSettings() {
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
