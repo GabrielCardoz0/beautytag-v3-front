@@ -77,6 +77,23 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
     }
   };
 
+  const handleDeleteCollaborator = async () => {
+    if (!plan) return;
+    try {
+      setDeleting(true);
+      await plansApi.delete(plan.id);
+      toast.success('Colaborador excluído com sucesso');
+      setShowDeleteConfirm(false);
+      onOpenChange(false);
+      onRefresh();
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao excluir colaborador');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const availableServices = services.filter(
     s => !plan.planServices.some(ps => ps.serviceId === s.id)
   );
