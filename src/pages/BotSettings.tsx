@@ -117,6 +117,20 @@ export default function BotSettings() {
     pollingRef.current = setInterval(fetchQr, 5000);
   };
 
+  const handleDisconnectWhatsApp = async () => {
+    setDisconnecting(true);
+    try {
+      await api.delete('/evolution/instance');
+      toast.success('WhatsApp desconectado com sucesso!');
+      await fetchBot();
+    } catch (error) {
+      console.error('Error disconnecting WhatsApp:', error);
+      toast.error('Erro ao desconectar WhatsApp');
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
   const stopPolling = () => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
