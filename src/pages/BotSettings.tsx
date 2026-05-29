@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone, Loader2 } from 'lucide-react';
+import { Bot, Save, MessageSquare, Clock, ToggleLeft, ToggleRight, Smartphone, Loader2, Unlink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
