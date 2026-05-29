@@ -41,28 +41,29 @@ export default function BotSettings() {
   const [disconnecting, setDisconnecting] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const fetchBot = async () => {
+    try {
+      const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; name: string; behavior: string; company_description: string; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
+      const bot = response.data.bot;
+      setIsEnabled(bot.is_active);
+      setIsConnected(bot.is_connected);
+      setBotName(bot.name || '');
+      setBehavior(bot.behavior || '');
+      setCompanyDescription(bot.company_description || '');
+      setWelcomeMessage(bot.welcome_msg);
+      setOutOfHoursMessage(bot.out_of_turn_msg);
+      setResponseDelay(String(bot.response_time));
+      setBusinessHoursStart(minutesToTime(bot.start_time));
+      setBusinessHoursEnd(minutesToTime(bot.end_time));
+    } catch (error) {
+      console.error('Error fetching bot settings:', error);
+      toast.error('Erro ao carregar configurações do bot');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBot = async () => {
-      try {
-        const response = await api.get<{ bot: { is_active: boolean; is_connected: boolean; name: string; behavior: string; company_description: string; welcome_msg: string; out_of_turn_msg: string; response_time: number; start_time: number; end_time: number } }>('/bot');
-        const bot = response.data.bot;
-        setIsEnabled(bot.is_active);
-        setIsConnected(bot.is_connected);
-        setBotName(bot.name || '');
-        setBehavior(bot.behavior || '');
-        setCompanyDescription(bot.company_description || '');
-        setWelcomeMessage(bot.welcome_msg);
-        setOutOfHoursMessage(bot.out_of_turn_msg);
-        setResponseDelay(String(bot.response_time));
-        setBusinessHoursStart(minutesToTime(bot.start_time));
-        setBusinessHoursEnd(minutesToTime(bot.end_time));
-      } catch (error) {
-        console.error('Error fetching bot settings:', error);
-        toast.error('Erro ao carregar configurações do bot');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBot();
   }, []);
 
