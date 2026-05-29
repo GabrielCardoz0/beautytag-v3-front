@@ -3,6 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Trash2, Plus, Loader2, User, Phone, Mail, Building2, Calendar } from 'lucide-react';
 import { Plan, Service } from '@/types';
 import { plansApi, servicesApi } from '@/lib/api';
@@ -19,6 +30,8 @@ interface PlanDetailsModalProps {
 export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDetailsModalProps) {
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [selectedFrequency, setSelectedFrequency] = useState<string>('1x');
@@ -61,6 +74,23 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
       toast.error('Erro ao remover serviço');
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleDeleteCollaborator = async () => {
+    if (!plan) return;
+    try {
+      setDeleting(true);
+      await plansApi.delete(plan.id);
+      toast.success('Colaborador excluído com sucesso');
+      setShowDeleteConfirm(false);
+      onOpenChange(false);
+      onRefresh();
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao excluir colaborador');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -203,6 +233,39 @@ export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDe
           <div className="flex justify-between items-center pt-3 border-t">
             <span className="font-medium text-foreground">Total mensal</span>
             <span className="font-bold text-lg text-foreground">R$ {formatCurrency(plan.totalValue)}</span>
+          </div>
+
+          <div className="pt-4 border-t space-y-2">
+            <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="w-full">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir colaborador
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir colaborador?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja excluir o colaborador <strong>{plan.userName}</strong>? Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDeleteCollaborator();
+                    }}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Excluir
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </DialogContent>
