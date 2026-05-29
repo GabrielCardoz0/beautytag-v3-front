@@ -30,6 +30,8 @@ interface PlanDetailsModalProps {
 export function PlanDetailsModal({ open, onOpenChange, plan, onRefresh }: PlanDetailsModalProps) {
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [selectedFrequency, setSelectedFrequency] = useState<string>('1x');
