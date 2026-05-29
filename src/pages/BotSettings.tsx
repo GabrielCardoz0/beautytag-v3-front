@@ -324,7 +324,21 @@ export default function BotSettings() {
                 {isConnected ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
               </Button>
               {isConnected && (
-                <span className="text-sm text-green-600 font-medium">● Conectado</span>
+                <>
+                  <span className="text-sm text-green-600 font-medium">● Conectado</span>
+                  <Button
+                    onClick={handleDisconnectWhatsApp}
+                    variant="destructive"
+                    disabled={disconnecting}
+                  >
+                    {disconnecting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Unlink className="h-4 w-4 mr-2" />
+                    )}
+                    Desconectar
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
