@@ -137,7 +137,7 @@ export function AppointmentDetailsModal({
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
