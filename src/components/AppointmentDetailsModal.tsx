@@ -27,7 +27,7 @@ export function AppointmentDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Detalhes do Agendamento</DialogTitle>
         </DialogHeader>
@@ -88,7 +88,7 @@ export function AppointmentDetailsModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-primary mt-0.5" />
                 <div>
@@ -137,7 +137,7 @@ export function AppointmentDetailsModal({
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
