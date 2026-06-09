@@ -8,95 +8,96 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 168 44% 97%;
+    --foreground: 211 60% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 211 60% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 211 60% 18%;
 
-    --primary: 0 72% 51%;
+    --primary: 211 71% 31%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 15% 96%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 168 44% 83%;
+    --secondary-foreground: 211 60% 18%;
 
-    --muted: 210 15% 95%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 168 30% 92%;
+    --muted-foreground: 211 25% 40%;
 
-    --accent: 200 90% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 174 38% 69%;
+    --accent-foreground: 211 60% 18%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 2 73% 64%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 15% 88%;
-    --input: 215 15% 88%;
-    --ring: 0 72% 51%;
+    --border: 174 25% 82%;
+    --input: 174 25% 82%;
+    --ring: 211 71% 31%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 215 30% 20%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 215 85% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 25%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 20% 30%;
-    --sidebar-ring: 215 85% 45%;
-    
-    --calendar-hour-line: 215 15% 90%;
-    --calendar-current-time: 200 90% 50%;
-    --appointment-bg: 215 90% 95%;
-    --appointment-border: 215 85% 45%;
+    --sidebar-background: 211 71% 31%;
+    --sidebar-foreground: 168 44% 95%;
+    --sidebar-primary: 174 38% 69%;
+    --sidebar-primary-foreground: 211 60% 18%;
+    --sidebar-accent: 210 58% 43%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 50% 26%;
+    --sidebar-ring: 174 38% 69%;
+
+    --calendar-hour-line: 174 25% 88%;
+    --calendar-current-time: 210 58% 43%;
+    --appointment-bg: 168 44% 90%;
+    --appointment-border: 211 71% 31%;
   }
 
   .dark {
-    --background: 215 25% 12%;
-    --foreground: 210 20% 95%;
+    --background: 211 50% 10%;
+    --foreground: 168 44% 95%;
 
-    --card: 215 25% 15%;
-    --card-foreground: 210 20% 95%;
+    --card: 211 50% 14%;
+    --card-foreground: 168 44% 95%;
 
-    --popover: 215 25% 15%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 211 50% 14%;
+    --popover-foreground: 168 44% 95%;
 
-    --primary: 0 72% 45%;
+    --primary: 210 58% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 20%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 211 40% 22%;
+    --secondary-foreground: 168 44% 95%;
 
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 211 40% 18%;
+    --muted-foreground: 174 20% 70%;
 
-    --accent: 200 90% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 174 38% 55%;
+    --accent-foreground: 211 60% 12%;
 
-    --destructive: 0 72% 45%;
+    --destructive: 2 73% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 25%;
-    --input: 215 20% 25%;
-    --ring: 0 72% 45%;
-    
-    --sidebar-background: 215 30% 15%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 215 85% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 20%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 215 20% 22%;
-    --sidebar-ring: 215 85% 50%;
-    
-    --calendar-hour-line: 215 15% 25%;
-    --calendar-current-time: 200 90% 45%;
-    --appointment-bg: 215 70% 20%;
-    --appointment-border: 215 85% 50%;
+    --border: 211 40% 24%;
+    --input: 211 40% 24%;
+    --ring: 210 58% 53%;
+
+    --sidebar-background: 211 60% 14%;
+    --sidebar-foreground: 168 44% 92%;
+    --sidebar-primary: 174 38% 60%;
+    --sidebar-primary-foreground: 211 60% 12%;
+    --sidebar-accent: 210 58% 43%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 211 40% 20%;
+    --sidebar-ring: 174 38% 60%;
+
+    --calendar-hour-line: 211 40% 24%;
+    --calendar-current-time: 174 38% 60%;
+    --appointment-bg: 211 50% 22%;
+    --appointment-border: 174 38% 60%;
   }
 }
+
 
 @layer base {
   * {
