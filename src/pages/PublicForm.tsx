@@ -513,15 +513,15 @@ const PublicForm = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="w-full md:w-48">
-                              <Select 
-                                value={selection?.frequency || ''} 
-                                onValueChange={(value) => handleServiceFrequencyChange(index, value)}
+                              <Select
+                                value={selection?.frequency || ''}
+                                onValueChange={(value) => handleServiceFrequencyChange(index, value === 'none' ? '' : value)}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Frequência" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="">Não incluir</SelectItem>
+                                  <SelectItem value="none">Não incluir</SelectItem>
                                   <SelectItem value="1x">1x por mês</SelectItem>
                                   <SelectItem value="2x">2x por mês</SelectItem>
                                   <SelectItem value="3x">3x por mês</SelectItem>
