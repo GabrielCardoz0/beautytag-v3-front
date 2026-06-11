@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm } from '@/types';
-import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw, X } from 'lucide-react';
 import axios from 'axios';
 import { formatCurrency } from '@/lib/utils';
 import { formatCPF, formatCEP, formatPhone } from '@/lib/masks';
@@ -521,6 +521,7 @@ const PublicForm = () => {
                                   <SelectValue placeholder="Frequência" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="">Não incluir</SelectItem>
                                   <SelectItem value="1x">1x por mês</SelectItem>
                                   <SelectItem value="2x">2x por mês</SelectItem>
                                   <SelectItem value="3x">3x por mês</SelectItem>
@@ -528,6 +529,18 @@ const PublicForm = () => {
                                 </SelectContent>
                               </Select>
                             </div>
+                            {selection?.frequency && (
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleServiceFrequencyChange(index, '')}
+                                title="Remover serviço"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                             {hasAlternatives && (
                               <Button 
                                 type="button" 
