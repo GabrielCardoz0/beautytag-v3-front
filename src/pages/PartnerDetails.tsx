@@ -20,6 +20,7 @@ import {
 import { partnersApi } from '@/lib/api';
 import { Partner } from '@/types';
 import { toast } from 'sonner';
+import { formatCNPJ, formatCEP, formatPhone } from '@/lib/masks';
 
 interface EditData {
   name: string;
@@ -161,7 +162,11 @@ export default function PartnerDetails() {
 
   const handleChange = (field: keyof EditData, value: string) => {
     if (editData) {
-      setEditData({ ...editData, [field]: value });
+      let masked = value;
+      if (field === 'cnpj') masked = formatCNPJ(value);
+      if (field === 'whatsapp') masked = formatPhone(value);
+      if (field === 'cep') masked = formatCEP(value);
+      setEditData({ ...editData, [field]: masked });
     }
   };
 

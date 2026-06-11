@@ -100,7 +100,11 @@ const PublicForm = () => {
   }, [formId]);
 
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
-    setPersonalInfo(prev => ({ ...prev, [field]: value }));
+    let masked = value;
+    if (field === 'cpf') masked = formatCPF(value);
+    if (field === 'whatsapp') masked = formatPhone(value);
+    if (field === 'cep') masked = formatCEP(value);
+    setPersonalInfo(prev => ({ ...prev, [field]: masked }));
   };
 
   const handleServiceFrequencyChange = (optionIndex: number, frequency: string) => {
