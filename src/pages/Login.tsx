@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { sanitizePassword } from '@/lib/masks';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -66,7 +67,7 @@ export default function Login() {
                 type="password"
                 placeholder="••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(sanitizePassword(e.target.value))}
                 required
               />
             </div>
