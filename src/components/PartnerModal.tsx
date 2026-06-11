@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { formatPhone, formatCNPJ, formatCEP } from '@/lib/masks';
 
 interface PartnerFormData {
   name: string;
@@ -33,27 +34,6 @@ interface PartnerModalProps {
   }) => void;
 }
 
-const formatPhone = (value: string) => {
-  const c = value.replace(/\D/g, '').slice(0, 11);
-  if (c.length <= 2) return c;
-  if (c.length <= 7) return `(${c.slice(0, 2)})${c.slice(2)}`;
-  return `(${c.slice(0, 2)})${c.slice(2, 7)}-${c.slice(7)}`;
-};
-
-const formatCNPJ = (value: string) => {
-  const c = value.replace(/\D/g, '').slice(0, 14);
-  if (c.length <= 2) return c;
-  if (c.length <= 5) return `${c.slice(0, 2)}.${c.slice(2)}`;
-  if (c.length <= 8) return `${c.slice(0, 2)}.${c.slice(2, 5)}.${c.slice(5)}`;
-  if (c.length <= 12) return `${c.slice(0, 2)}.${c.slice(2, 5)}.${c.slice(5, 8)}/${c.slice(8)}`;
-  return `${c.slice(0, 2)}.${c.slice(2, 5)}.${c.slice(5, 8)}/${c.slice(8, 12)}-${c.slice(12)}`;
-};
-
-const formatCEP = (value: string) => {
-  const c = value.replace(/\D/g, '').slice(0, 8);
-  if (c.length <= 5) return c;
-  return `${c.slice(0, 5)}-${c.slice(5)}`;
-};
 
 export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) {
   const [formData, setFormData] = useState<PartnerFormData>(initialFormData);

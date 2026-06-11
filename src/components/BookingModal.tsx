@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Service } from "@/types";
 import { servicesApi, appointmentsApi } from "@/lib/api";
 import { toast } from "sonner";
+import { formatPhone } from "@/lib/masks";
 
 interface BookingModalProps {
   open: boolean;
@@ -127,7 +128,7 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                 <Input
                   id="clientPhone"
                   value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
+                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
                   placeholder="(00) 00000-0000"
                   required
                 />

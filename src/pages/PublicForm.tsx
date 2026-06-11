@@ -10,6 +10,7 @@ import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm 
 import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import { formatCurrency } from '@/lib/utils';
+import { formatCPF, formatCEP, formatPhone } from '@/lib/masks';
 import { API_BASE_URL } from '@/lib/api';
 
 interface PersonalInfo {
@@ -99,7 +100,11 @@ const PublicForm = () => {
   }, [formId]);
 
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
-    setPersonalInfo(prev => ({ ...prev, [field]: value }));
+    let masked = value;
+    if (field === 'cpf') masked = formatCPF(value);
+    if (field === 'whatsapp') masked = formatPhone(value);
+    if (field === 'cep') masked = formatCEP(value);
+    setPersonalInfo(prev => ({ ...prev, [field]: masked }));
   };
 
   const handleServiceFrequencyChange = (optionIndex: number, frequency: string) => {
