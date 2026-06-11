@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Service } from "@/types";
 import { servicesApi, appointmentsApi } from "@/lib/api";
 import { toast } from "sonner";
+import { formatPhone } from "@/lib/masks";
 
 interface BookingModalProps {
   open: boolean;
