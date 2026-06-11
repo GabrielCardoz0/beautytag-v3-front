@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, Service, ApiService, ApiForm, apiServiceToService, apiFormToForm } from '@/types';
 import { Sparkles, Play, FileText, User, ShoppingCart, CheckCircle, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+import { formatCurrency } from '@/lib/utils';
 import { formatCPF, formatCEP, formatPhone } from '@/lib/masks';
 import { API_BASE_URL } from '@/lib/api';
 
