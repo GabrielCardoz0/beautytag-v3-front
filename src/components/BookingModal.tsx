@@ -128,7 +128,7 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                 <Input
                   id="clientPhone"
                   value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
+                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
                   placeholder="(00) 00000-0000"
                   required
                 />
