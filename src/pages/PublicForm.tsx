@@ -521,6 +521,7 @@ const PublicForm = () => {
                                   <SelectValue placeholder="Frequência" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="">Não incluir</SelectItem>
                                   <SelectItem value="1x">1x por mês</SelectItem>
                                   <SelectItem value="2x">2x por mês</SelectItem>
                                   <SelectItem value="3x">3x por mês</SelectItem>
@@ -528,6 +529,18 @@ const PublicForm = () => {
                                 </SelectContent>
                               </Select>
                             </div>
+                            {selection?.frequency && (
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleServiceFrequencyChange(index, '')}
+                                title="Remover serviço"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                             {hasAlternatives && (
                               <Button 
                                 type="button" 
