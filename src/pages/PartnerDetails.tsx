@@ -358,6 +358,14 @@ export default function PartnerDetails() {
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
+                    <Label>Instagram</Label>
+                    <Input
+                      value={editData?.instagram || ''}
+                      onChange={(e) => handleChange('instagram', e.target.value)}
+                      placeholder="@meu_estabelecimento"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
                     <Label>Pagar.me ID (opcional)</Label>
                     <Input
                       value={editData?.pagarme_id || ''}
