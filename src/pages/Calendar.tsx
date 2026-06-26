@@ -10,6 +10,7 @@ import { format, addDays, startOfWeek, endOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentData } from "@/types";
 import { appointmentsApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function Calendar() {
