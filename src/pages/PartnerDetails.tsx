@@ -64,6 +64,7 @@ export default function PartnerDetails() {
           neighborhood: data.neighborhood,
           city: data.city,
           state: data.state,
+          instagram: data.instagram || '',
           pagarme_id: data.pagarme_id || '',
         });
       }
