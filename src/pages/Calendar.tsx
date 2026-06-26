@@ -49,6 +49,18 @@ export default function Calendar() {
     loadAppointments();
   }, [loadAppointments]);
 
+  useEffect(() => {
+    if (!isPartner) return;
+    appointmentsApi
+      .earnings()
+      .then(setEarnings)
+      .catch((err) => {
+        console.error("Error loading earnings:", err);
+        setEarnings({ today: 0, month: 0 });
+      });
+  }, [isPartner]);
+
+
   const handleDeleteAppointment = async (id: number) => {
     try {
       await appointmentsApi.delete(id);
