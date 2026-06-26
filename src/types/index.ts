@@ -41,6 +41,7 @@ export interface Partner {
   neighborhood: string;
   city: string;
   state: string;
+  instagram: string;
   pagarme_id: string;
   confirmed: boolean;
   blocked: boolean;
