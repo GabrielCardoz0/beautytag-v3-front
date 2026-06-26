@@ -10,6 +10,7 @@ export interface ApiPartnerMetadata {
   bairro?: string;
   cidade?: string;
   estado?: string;
+  instagram?: string;
 }
 
 // Tipo da API para parceiro (usuário com role parceiro)
