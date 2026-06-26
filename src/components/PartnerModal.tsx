@@ -61,6 +61,7 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
         bairro: formData.bairro,
         cidade: formData.cidade,
         estado: formData.estado,
+        ...(formData.instagram ? { instagram: formData.instagram } : {}),
       },
     });
 
