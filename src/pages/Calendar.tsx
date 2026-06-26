@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function Calendar() {
+  const { user } = useAuth();
+  const isPartner = user?.role === 'partner' || user?.role === 'parceiro';
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentData | null>(null);
@@ -21,6 +23,7 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCalendarOpen, setMobileCalendarOpen] = useState(false);
+  const [earnings, setEarnings] = useState<{ today: number; month: number }>({ today: 0, month: 0 });
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
