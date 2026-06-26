@@ -126,6 +126,10 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
               <Label>Estado</Label>
               <Input value={formData.estado} onChange={e => handleChange('estado', e.target.value.toUpperCase())} placeholder="SP" maxLength={2} />
             </div>
+            <div className="space-y-2 md:col-span-3">
+              <Label>Instagram</Label>
+              <Input value={formData.instagram} onChange={e => handleChange('instagram', e.target.value)} placeholder="@meu_estabelecimento" />
+            </div>
           </div>
         </div>
 
