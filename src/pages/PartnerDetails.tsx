@@ -33,6 +33,7 @@ interface EditData {
   neighborhood: string;
   city: string;
   state: string;
+  instagram: string;
   pagarme_id: string;
 }
 
