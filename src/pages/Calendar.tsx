@@ -200,9 +200,27 @@ export default function Calendar() {
 
         {/* Appointments list */}
         <div className="flex-1 overflow-auto p-4 md:p-6 pb-24 md:pb-6">
+          {isPartner && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 max-w-2xl">
+              <Card className="p-4">
+                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Hoje</p>
+                <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+                  R$ {(earnings.today / 100).toFixed(2).replace('.', ',')}
+                </p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Este Mês</p>
+                <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+                  R$ {(earnings.month / 100).toFixed(2).replace('.', ',')}
+                </p>
+              </Card>
+            </div>
+          )}
+
           <h2 className="text-base md:text-lg font-semibold text-foreground mb-4">
             Agendamentos de {format(selectedDate, "dd/MM", { locale: ptBR })}
           </h2>
+
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
