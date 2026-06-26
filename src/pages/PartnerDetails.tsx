@@ -383,7 +383,14 @@ export default function PartnerDetails() {
                         <p className="text-sm text-muted-foreground">Email</p>
                         <p className="font-medium">{partner.email}</p>
                       </div>
+                  </div>
+
+                  {partner.instagram && (
+                    <div className="flex items-center gap-3 pt-2 border-t">
+                      <span className="text-sm text-muted-foreground">Instagram</span>
+                      <span className="font-medium">{partner.instagram}</span>
                     </div>
+                  )}
                     <div className="flex items-center gap-3">
                       <Phone className="h-5 w-5 text-muted-foreground" />
                       <div>
