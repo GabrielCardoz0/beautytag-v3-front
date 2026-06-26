@@ -93,6 +93,7 @@ export default function PartnerDetails() {
         neighborhood: partner.neighborhood,
         city: partner.city,
         state: partner.state,
+        instagram: partner.instagram || '',
         pagarme_id: partner.pagarme_id || '',
       });
       setIsEditing(true);
