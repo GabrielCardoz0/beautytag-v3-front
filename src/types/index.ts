@@ -10,6 +10,7 @@ export interface ApiPartnerMetadata {
   bairro?: string;
   cidade?: string;
   estado?: string;
+  instagram?: string;
 }
 
 // Tipo da API para parceiro (usuário com role parceiro)
@@ -40,6 +41,7 @@ export interface Partner {
   neighborhood: string;
   city: string;
   state: string;
+  instagram: string;
   pagarme_id: string;
   confirmed: boolean;
   blocked: boolean;
@@ -358,6 +360,7 @@ export function apiPartnerToPartner(apiPartner: ApiPartner): Partner {
     neighborhood: apiPartner?.metadata?.bairro || '',
     city: apiPartner?.metadata?.cidade || '',
     state: apiPartner?.metadata?.estado || '',
+    instagram: apiPartner?.metadata?.instagram || '',
     pagarme_id: apiPartner?.pagarme_id || '',
     confirmed: apiPartner?.confirmed,
     blocked: apiPartner?.blocked,

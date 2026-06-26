@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button";
 
 
 const allMenuItems = [
-  { title: "Calendário", url: "/calendar", icon: Calendar, roles: ['admin', 'partner'] },
+  { title: "Calendário", url: "/calendar", icon: Calendar, roles: ['admin', 'partner', 'parceiro'] },
   { title: "Parceiros", url: "/partners", icon: Building2, roles: ['admin'] },
   { title: "Colaboradores", url: "/collaborators", icon: Users, roles: ['admin'] },
-  { title: "Serviços", url: "/services", icon: Scissors, roles: ['admin', 'partner'] },
+  { title: "Serviços", url: "/services", icon: Scissors, roles: ['admin', 'partner', 'parceiro'] },
   { title: "Formulários", url: "/forms", icon: FileText, roles: ['admin'] },
   { title: "Notificações", url: "/notifications", icon: Bell, roles: ['admin'] },
   { title: "Bot de Atendimento", url: "/bot-settings", icon: Bot, roles: ['admin'] },

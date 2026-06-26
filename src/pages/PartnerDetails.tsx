@@ -33,6 +33,7 @@ interface EditData {
   neighborhood: string;
   city: string;
   state: string;
+  instagram: string;
   pagarme_id: string;
 }
 
@@ -63,6 +64,7 @@ export default function PartnerDetails() {
           neighborhood: data.neighborhood,
           city: data.city,
           state: data.state,
+          instagram: data.instagram || '',
           pagarme_id: data.pagarme_id || '',
         });
       }
@@ -91,6 +93,7 @@ export default function PartnerDetails() {
         neighborhood: partner.neighborhood,
         city: partner.city,
         state: partner.state,
+        instagram: partner.instagram || '',
         pagarme_id: partner.pagarme_id || '',
       });
       setIsEditing(true);
@@ -110,6 +113,7 @@ export default function PartnerDetails() {
         neighborhood: partner.neighborhood,
         city: partner.city,
         state: partner.state,
+        instagram: partner.instagram || '',
         pagarme_id: partner.pagarme_id || '',
       });
     }
@@ -134,6 +138,7 @@ export default function PartnerDetails() {
           bairro: editData.neighborhood,
           cidade: editData.city,
           estado: editData.state,
+          ...(editData.instagram ? { instagram: editData.instagram } : {}),
         },
       });
       await loadPartner();
@@ -353,6 +358,14 @@ export default function PartnerDetails() {
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
+                    <Label>Instagram</Label>
+                    <Input
+                      value={editData?.instagram || ''}
+                      onChange={(e) => handleChange('instagram', e.target.value)}
+                      placeholder="@meu_estabelecimento"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
                     <Label>Pagar.me ID (opcional)</Label>
                     <Input
                       value={editData?.pagarme_id || ''}
@@ -370,7 +383,14 @@ export default function PartnerDetails() {
                         <p className="text-sm text-muted-foreground">Email</p>
                         <p className="font-medium">{partner.email}</p>
                       </div>
+                  </div>
+
+                  {partner.instagram && (
+                    <div className="flex items-center gap-3 pt-2 border-t">
+                      <span className="text-sm text-muted-foreground">Instagram</span>
+                      <span className="font-medium">{partner.instagram}</span>
                     </div>
+                  )}
                     <div className="flex items-center gap-3">
                       <Phone className="h-5 w-5 text-muted-foreground" />
                       <div>

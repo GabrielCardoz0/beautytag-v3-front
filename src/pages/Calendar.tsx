@@ -10,9 +10,12 @@ import { format, addDays, startOfWeek, endOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentData } from "@/types";
 import { appointmentsApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function Calendar() {
+  const { user } = useAuth();
+  const isPartner = user?.role === 'partner' || user?.role === 'parceiro';
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentData | null>(null);
@@ -20,6 +23,7 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCalendarOpen, setMobileCalendarOpen] = useState(false);
+  const [earnings, setEarnings] = useState<{ today: number; month: number }>({ today: 0, month: 0 });
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
@@ -44,6 +48,18 @@ export default function Calendar() {
   useEffect(() => {
     loadAppointments();
   }, [loadAppointments]);
+
+  useEffect(() => {
+    if (!isPartner) return;
+    appointmentsApi
+      .earnings()
+      .then(setEarnings)
+      .catch((err) => {
+        console.error("Error loading earnings:", err);
+        setEarnings({ today: 0, month: 0 });
+      });
+  }, [isPartner]);
+
 
   const handleDeleteAppointment = async (id: number) => {
     try {
@@ -184,9 +200,27 @@ export default function Calendar() {
 
         {/* Appointments list */}
         <div className="flex-1 overflow-auto p-4 md:p-6 pb-24 md:pb-6">
+          {isPartner && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 max-w-2xl">
+              <Card className="p-4">
+                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Hoje</p>
+                <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+                  R$ {(earnings.today / 100).toFixed(2).replace('.', ',')}
+                </p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Este Mês</p>
+                <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+                  R$ {(earnings.month / 100).toFixed(2).replace('.', ',')}
+                </p>
+              </Card>
+            </div>
+          )}
+
           <h2 className="text-base md:text-lg font-semibold text-foreground mb-4">
             Agendamentos de {format(selectedDate, "dd/MM", { locale: ptBR })}
           </h2>
+
 
           {loading ? (
             <div className="flex items-center justify-center py-12">

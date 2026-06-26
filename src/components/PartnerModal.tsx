@@ -17,11 +17,12 @@ interface PartnerFormData {
   bairro: string;
   cidade: string;
   estado: string;
+  instagram: string;
 }
 
 const initialFormData: PartnerFormData = {
   name: '', email: '', whatsapp: '', cnpj: '',
-  cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '',
+  cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', instagram: '',
 };
 
 interface PartnerModalProps {
@@ -60,6 +61,7 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
         bairro: formData.bairro,
         cidade: formData.cidade,
         estado: formData.estado,
+        ...(formData.instagram ? { instagram: formData.instagram } : {}),
       },
     });
 
@@ -123,6 +125,10 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
             <div className="space-y-2">
               <Label>Estado</Label>
               <Input value={formData.estado} onChange={e => handleChange('estado', e.target.value.toUpperCase())} placeholder="SP" maxLength={2} />
+            </div>
+            <div className="space-y-2 md:col-span-3">
+              <Label>Instagram</Label>
+              <Input value={formData.instagram} onChange={e => handleChange('instagram', e.target.value)} placeholder="@meu_estabelecimento" />
             </div>
           </div>
         </div>
