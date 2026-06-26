@@ -17,11 +17,12 @@ interface PartnerFormData {
   bairro: string;
   cidade: string;
   estado: string;
+  instagram: string;
 }
 
 const initialFormData: PartnerFormData = {
   name: '', email: '', whatsapp: '', cnpj: '',
-  cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '',
+  cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', instagram: '',
 };
 
 interface PartnerModalProps {
