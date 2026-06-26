@@ -273,6 +273,13 @@ export const appointmentsApi = {
     await api.delete(`/appointments/${id}`);
     return true;
   },
+
+  earnings: async (): Promise<{ today: number; month: number }> => {
+    const response = await api.get<{ earnings: { today: number; month: number } }>(
+      "/appointments/earnings"
+    );
+    return response.data.earnings;
+  },
 };
 
 // Auth API
