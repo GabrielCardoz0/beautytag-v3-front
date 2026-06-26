@@ -138,6 +138,7 @@ export default function PartnerDetails() {
           bairro: editData.neighborhood,
           cidade: editData.city,
           estado: editData.state,
+          ...(editData.instagram ? { instagram: editData.instagram } : {}),
         },
       });
       await loadPartner();
