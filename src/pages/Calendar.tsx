@@ -49,16 +49,37 @@ export default function Calendar() {
     loadAppointments();
   }, [loadAppointments]);
 
+  const monthStart = startOfMonth(selectedDate);
+  const monthEnd = endOfMonth(selectedDate);
+
   useEffect(() => {
     if (!isPartner) return;
+    let cancelled = false;
     appointmentsApi
-      .earnings()
-      .then(setEarnings)
+      .list(monthStart.toISOString(), monthEnd.toISOString())
+      .then((data) => {
+        if (!cancelled) setMonthAppointments(data);
+      })
       .catch((err) => {
-        console.error("Error loading earnings:", err);
-        setEarnings({ today: 0, month: 0 });
+        console.error("Error loading month appointments:", err);
+        if (!cancelled) setMonthAppointments([]);
       });
-  }, [isPartner]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isPartner, monthStart.toISOString(), monthEnd.toISOString()]);
+
+  const sumEarnings = (list: AppointmentData[]) =>
+    list
+      .filter((a) => (a.status || "").toLowerCase() !== "cancelado")
+      .reduce((sum, a) => sum + a.services.reduce((s, srv) => s + srv.price, 0), 0);
+
+  const dayEarnings = sumEarnings(
+    monthAppointments.filter((a) => isSameDay(a.startAt, selectedDate))
+  );
+  const monthEarnings = sumEarnings(
+    monthAppointments.filter((a) => isSameMonth(a.startAt, selectedDate))
+  );
 
 
   const handleDeleteAppointment = async (id: number) => {
