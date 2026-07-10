@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { Plus, Loader2, CalendarDays } from "lucide-react";
 import { BookingModal } from "@/components/BookingModal";
 import { AppointmentDetailsModal } from "@/components/AppointmentDetailsModal";
-import { format, addDays, startOfWeek, endOfWeek, isSameDay } from "date-fns";
+import { format, addDays, startOfWeek, endOfWeek, isSameDay, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentData } from "@/types";
 import { appointmentsApi } from "@/lib/api";
