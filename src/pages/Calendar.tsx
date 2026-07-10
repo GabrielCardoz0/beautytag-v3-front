@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { Plus, Loader2, CalendarDays } from "lucide-react";
 import { BookingModal } from "@/components/BookingModal";
 import { AppointmentDetailsModal } from "@/components/AppointmentDetailsModal";
-import { format, addDays, startOfWeek, endOfWeek, isSameDay } from "date-fns";
+import { format, addDays, startOfWeek, endOfWeek, isSameDay, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentData } from "@/types";
 import { appointmentsApi } from "@/lib/api";
@@ -23,7 +23,7 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCalendarOpen, setMobileCalendarOpen] = useState(false);
-  const [earnings, setEarnings] = useState<{ today: number; month: number }>({ today: 0, month: 0 });
+  const [monthAppointments, setMonthAppointments] = useState<AppointmentData[]>([]);
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
@@ -49,16 +49,37 @@ export default function Calendar() {
     loadAppointments();
   }, [loadAppointments]);
 
+  const monthStart = startOfMonth(selectedDate);
+  const monthEnd = endOfMonth(selectedDate);
+
   useEffect(() => {
     if (!isPartner) return;
+    let cancelled = false;
     appointmentsApi
-      .earnings()
-      .then(setEarnings)
+      .list(monthStart.toISOString(), monthEnd.toISOString())
+      .then((data) => {
+        if (!cancelled) setMonthAppointments(data);
+      })
       .catch((err) => {
-        console.error("Error loading earnings:", err);
-        setEarnings({ today: 0, month: 0 });
+        console.error("Error loading month appointments:", err);
+        if (!cancelled) setMonthAppointments([]);
       });
-  }, [isPartner]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isPartner, monthStart.toISOString(), monthEnd.toISOString()]);
+
+  const sumEarnings = (list: AppointmentData[]) =>
+    list
+      .filter((a) => (a.status || "").toLowerCase() !== "cancelado")
+      .reduce((sum, a) => sum + a.services.reduce((s, srv) => s + srv.price, 0), 0);
+
+  const dayEarnings = sumEarnings(
+    monthAppointments.filter((a) => isSameDay(a.startAt, selectedDate))
+  );
+  const monthEarnings = sumEarnings(
+    monthAppointments.filter((a) => isSameMonth(a.startAt, selectedDate))
+  );
 
 
   const handleDeleteAppointment = async (id: number) => {
@@ -203,15 +224,19 @@ export default function Calendar() {
           {isPartner && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 max-w-2xl">
               <Card className="p-4">
-                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Hoje</p>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Faturamento {isSameDay(selectedDate, new Date()) ? "Hoje" : format(selectedDate, "dd/MM", { locale: ptBR })}
+                </p>
                 <p className="text-xl md:text-2xl font-bold text-primary mt-1">
-                  R$ {(earnings.today / 100).toFixed(2).replace('.', ',')}
+                  R$ {(dayEarnings / 100).toFixed(2).replace('.', ',')}
                 </p>
               </Card>
               <Card className="p-4">
-                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Este Mês</p>
+                <p className="text-xs md:text-sm text-muted-foreground capitalize">
+                  Faturamento {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
                 <p className="text-xl md:text-2xl font-bold text-primary mt-1">
-                  R$ {(earnings.month / 100).toFixed(2).replace('.', ',')}
+                  R$ {(monthEarnings / 100).toFixed(2).replace('.', ',')}
                 </p>
               </Card>
             </div>
