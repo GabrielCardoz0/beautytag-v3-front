@@ -224,15 +224,19 @@ export default function Calendar() {
           {isPartner && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 max-w-2xl">
               <Card className="p-4">
-                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Hoje</p>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Faturamento {isSameDay(selectedDate, new Date()) ? "Hoje" : format(selectedDate, "dd/MM", { locale: ptBR })}
+                </p>
                 <p className="text-xl md:text-2xl font-bold text-primary mt-1">
-                  R$ {(earnings.today / 100).toFixed(2).replace('.', ',')}
+                  R$ {(dayEarnings / 100).toFixed(2).replace('.', ',')}
                 </p>
               </Card>
               <Card className="p-4">
-                <p className="text-xs md:text-sm text-muted-foreground">Faturamento Este Mês</p>
+                <p className="text-xs md:text-sm text-muted-foreground capitalize">
+                  Faturamento {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
                 <p className="text-xl md:text-2xl font-bold text-primary mt-1">
-                  R$ {(earnings.month / 100).toFixed(2).replace('.', ',')}
+                  R$ {(monthEarnings / 100).toFixed(2).replace('.', ',')}
                 </p>
               </Card>
             </div>
