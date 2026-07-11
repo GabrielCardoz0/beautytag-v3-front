@@ -13,6 +13,11 @@ export default defineConfig(({ mode }) => ({
       overlay: false
     }
   },
+  preview: {
+    host: "::",
+    port: 4173,
+    allowedHosts: ["beautytag.com.br", "www.beautytag.com.br"],
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
