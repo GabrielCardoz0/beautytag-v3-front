@@ -23,7 +23,7 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCalendarOpen, setMobileCalendarOpen] = useState(false);
-  const [monthAppointments, setMonthAppointments] = useState<AppointmentData[]>([]);
+  const [earnings, setEarnings] = useState<{ today: number; month: number }>({ today: 0, month: 0 });
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
@@ -49,37 +49,25 @@ export default function Calendar() {
     loadAppointments();
   }, [loadAppointments]);
 
-  const monthStart = startOfMonth(selectedDate);
-  const monthEnd = endOfMonth(selectedDate);
-
   useEffect(() => {
     if (!isPartner) return;
     let cancelled = false;
     appointmentsApi
-      .list(monthStart.toISOString(), monthEnd.toISOString())
+      .earnings(format(selectedDate, "yyyy-MM-dd"))
       .then((data) => {
-        if (!cancelled) setMonthAppointments(data);
+        if (!cancelled) setEarnings(data);
       })
       .catch((err) => {
-        console.error("Error loading month appointments:", err);
-        if (!cancelled) setMonthAppointments([]);
+        console.error("Error loading earnings:", err);
+        if (!cancelled) setEarnings({ today: 0, month: 0 });
       });
     return () => {
       cancelled = true;
     };
-  }, [isPartner, monthStart.toISOString(), monthEnd.toISOString()]);
+  }, [isPartner, selectedDate]);
 
-  const sumEarnings = (list: AppointmentData[]) =>
-    list
-      .filter((a) => (a.status || "").toLowerCase() !== "cancelado")
-      .reduce((sum, a) => sum + a.services.reduce((s, srv) => s + srv.price, 0), 0);
-
-  const dayEarnings = sumEarnings(
-    monthAppointments.filter((a) => isSameDay(a.startAt, selectedDate))
-  );
-  const monthEarnings = sumEarnings(
-    monthAppointments.filter((a) => isSameMonth(a.startAt, selectedDate))
-  );
+  const dayEarnings = earnings.today;
+  const monthEarnings = earnings.month;
 
 
   const handleDeleteAppointment = async (id: number) => {

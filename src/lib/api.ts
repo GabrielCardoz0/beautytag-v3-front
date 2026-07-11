@@ -274,9 +274,10 @@ export const appointmentsApi = {
     return true;
   },
 
-  earnings: async (): Promise<{ today: number; month: number }> => {
+  earnings: async (date?: string): Promise<{ today: number; month: number }> => {
     const response = await api.get<{ earnings: { today: number; month: number } }>(
-      "/appointments/earnings"
+      "/appointments/earnings",
+      { params: date ? { date } : undefined }
     );
     return response.data.earnings;
   },
