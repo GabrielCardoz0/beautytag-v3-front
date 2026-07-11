@@ -23,7 +23,7 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCalendarOpen, setMobileCalendarOpen] = useState(false);
-  const [monthAppointments, setMonthAppointments] = useState<AppointmentData[]>([]);
+  const [earnings, setEarnings] = useState<{ today: number; month: number }>({ today: 0, month: 0 });
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
