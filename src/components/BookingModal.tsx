@@ -59,7 +59,7 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
 
     const timer = setTimeout(() => {
       handlePhoneLookup(clientPhone);
-    }, 600);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, [clientPhone]);
@@ -138,14 +138,23 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clientPhone">Telefone *</Label>
-                <Input
-                  id="clientPhone"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
-                  placeholder="(00) 00000-0000"
-                  required
-                />
+                <Label htmlFor="clientPhone" className="flex items-center gap-2">
+                  Telefone *
+                  {lookingUpClient && <Loader2 className="h-3 w-3 animate-spin" />}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="clientPhone"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(formatPhone(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                    className={lookingUpClient ? "pr-10" : ""}
+                    required
+                  />
+                  {lookingUpClient && (
+                    <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clientName" className="flex items-center gap-2">
