@@ -12,7 +12,7 @@ import { format, setHours, setMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Service } from "@/types";
-import { servicesApi, appointmentsApi } from "@/lib/api";
+import { servicesApi, appointmentsApi, partnersApi } from "@/lib/api";
 import { toast } from "sonner";
 import { formatPhone } from "@/lib/masks";
 
