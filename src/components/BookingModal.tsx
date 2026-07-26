@@ -41,8 +41,8 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
   const [submitting, setSubmitting] = useState(false);
   const [lookingUpClient, setLookingUpClient] = useState(false);
 
-  const handlePhoneLookup = async () => {
-    const digits = clientPhone.replace(/\D/g, "");
+  const handlePhoneLookup = async (phone: string) => {
+    const digits = phone.replace(/\D/g, "");
     if (digits.length < 10) return;
     try {
       setLookingUpClient(true);
@@ -52,6 +52,17 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
       setLookingUpClient(false);
     }
   };
+
+  useEffect(() => {
+    const digits = clientPhone.replace(/\D/g, "");
+    if (digits.length < 10) return;
+
+    const timer = setTimeout(() => {
+      handlePhoneLookup(clientPhone);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [clientPhone]);
 
   useEffect(() => {
     if (open) {
@@ -132,7 +143,6 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                   id="clientPhone"
                   value={clientPhone}
                   onChange={(e) => setClientPhone(formatPhone(e.target.value))}
-                  onBlur={handlePhoneLookup}
                   placeholder="(00) 00000-0000"
                   required
                 />
