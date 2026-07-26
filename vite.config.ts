@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
         short_name: "BEAUTYTAG",
         description:
           "Plataforma profissional de agendamento para salões de beleza e barbearias",
-        theme_color: "#e00025",
+        theme_color: "#174d89",
         background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
