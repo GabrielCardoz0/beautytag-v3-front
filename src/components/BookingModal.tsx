@@ -39,6 +39,19 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
   const [services, setServices] = useState<Service[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [lookingUpClient, setLookingUpClient] = useState(false);
+
+  const handlePhoneLookup = async () => {
+    const digits = clientPhone.replace(/\D/g, "");
+    if (digits.length < 10) return;
+    try {
+      setLookingUpClient(true);
+      const name = await partnersApi.lookupClient(digits);
+      if (name) setClientName(name);
+    } finally {
+      setLookingUpClient(false);
+    }
+  };
 
   useEffect(() => {
     if (open) {
