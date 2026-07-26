@@ -102,6 +102,19 @@ export const partnersApi = {
     await api.delete(`/users/${id}`);
     return true;
   },
+
+  lookupClient: async (phone: string): Promise<string | null> => {
+    try {
+      const response = await api.get<{ client: { client_name: string | null } }>(
+        "/users/client",
+        { params: { phone } }
+      );
+      return response.data.client?.client_name ?? null;
+    } catch (error) {
+      console.error("Error looking up client:", error);
+      return null;
+    }
+  },
 };
 
 // Services API (Real)
