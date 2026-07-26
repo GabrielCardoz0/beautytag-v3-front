@@ -127,7 +127,21 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clientName">Nome do Cliente *</Label>
+                <Label htmlFor="clientPhone">Telefone *</Label>
+                <Input
+                  id="clientPhone"
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
+                  onBlur={handlePhoneLookup}
+                  placeholder="(00) 00000-0000"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="clientName" className="flex items-center gap-2">
+                  Nome do Cliente *
+                  {lookingUpClient && <Loader2 className="h-3 w-3 animate-spin" />}
+                </Label>
                 <Input
                   id="clientName"
                   value={clientName}
@@ -136,16 +150,7 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientPhone">Telefone *</Label>
-                <Input
-                  id="clientPhone"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
-                  placeholder="(00) 00000-0000"
-                  required
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
