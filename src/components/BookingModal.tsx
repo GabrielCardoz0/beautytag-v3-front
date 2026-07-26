@@ -143,7 +143,6 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                   id="clientPhone"
                   value={clientPhone}
                   onChange={(e) => setClientPhone(formatPhone(e.target.value))}
-                  onBlur={handlePhoneLookup}
                   placeholder="(00) 00000-0000"
                   required
                 />
