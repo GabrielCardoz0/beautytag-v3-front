@@ -12,7 +12,7 @@ import { format, setHours, setMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Service } from "@/types";
-import { servicesApi, appointmentsApi } from "@/lib/api";
+import { servicesApi, appointmentsApi, partnersApi } from "@/lib/api";
 import { toast } from "sonner";
 import { formatPhone } from "@/lib/masks";
 
@@ -39,6 +39,19 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
   const [services, setServices] = useState<Service[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [lookingUpClient, setLookingUpClient] = useState(false);
+
+  const handlePhoneLookup = async () => {
+    const digits = clientPhone.replace(/\D/g, "");
+    if (digits.length < 10) return;
+    try {
+      setLookingUpClient(true);
+      const name = await partnersApi.lookupClient(digits);
+      if (name) setClientName(name);
+    } finally {
+      setLookingUpClient(false);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -114,7 +127,21 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clientName">Nome do Cliente *</Label>
+                <Label htmlFor="clientPhone">Telefone *</Label>
+                <Input
+                  id="clientPhone"
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
+                  onBlur={handlePhoneLookup}
+                  placeholder="(00) 00000-0000"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="clientName" className="flex items-center gap-2">
+                  Nome do Cliente *
+                  {lookingUpClient && <Loader2 className="h-3 w-3 animate-spin" />}
+                </Label>
                 <Input
                   id="clientName"
                   value={clientName}
@@ -123,16 +150,7 @@ export function BookingModal({ open, onOpenChange, selectedDate, onCreated }: Bo
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientPhone">Telefone *</Label>
-                <Input
-                  id="clientPhone"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(formatPhone(e.target.value))}
-                  placeholder="(00) 00000-0000"
-                  required
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
