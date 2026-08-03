@@ -200,13 +200,13 @@ export default function PartnerDetails() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate('/partners')}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <Button variant="ghost" className="self-start px-2" onClick={() => navigate('/partners')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar para Parceiros
         </Button>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isEditing ? (
             <>
               <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>

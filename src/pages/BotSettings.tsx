@@ -152,7 +152,7 @@ export default function BotSettings() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
             <Bot className="h-8 w-8" />
@@ -160,7 +160,7 @@ export default function BotSettings() {
           </h1>
           <p className="text-muted-foreground mt-1">Configure o bot de atendimento automático</p>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Salvar Configurações
         </Button>
