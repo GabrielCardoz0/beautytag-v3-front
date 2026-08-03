@@ -144,17 +144,17 @@ export default function BotSettings() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 md:p-8 flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
             <Bot className="h-8 w-8" />
             Bot de Atendimento
           </h1>
@@ -271,7 +271,7 @@ export default function BotSettings() {
               <p className="text-xs text-muted-foreground">Delay antes de enviar resposta automática</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="businessHoursStart">Horário de início</Label>
                 <Input

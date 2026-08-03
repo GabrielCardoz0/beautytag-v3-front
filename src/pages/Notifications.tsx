@@ -66,7 +66,7 @@ export default function Notifications() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-muted rounded" />
           <div className="h-24 bg-muted rounded" />
@@ -77,7 +77,7 @@ export default function Notifications() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">Notificações</h1>
