@@ -245,7 +245,7 @@ const PublicForm = () => {
               <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="h-12 w-12 text-primary" />
               </div>
-              <h1 className="text-3xl font-bold mb-4">Bem-vindo!</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-4">Bem-vindo!</h1>
               <p className="text-muted-foreground mb-2 text-lg">{form.name}</p>
               <p className="text-muted-foreground mb-8">{form.description}</p>
               <Button size="lg" onClick={nextStep} className="px-8">
@@ -691,7 +691,7 @@ const PublicForm = () => {
               <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
               </div>
-              <h1 className="text-3xl font-bold mb-4 text-green-600 dark:text-green-400">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4 text-green-600 dark:text-green-400">
                 Cadastro Realizado!
               </h1>
               <p className="text-muted-foreground mb-2 text-lg">

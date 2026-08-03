@@ -177,7 +177,7 @@ export default function PartnerDetails() {
 
   if (isLoading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 md:p-8 flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -185,7 +185,7 @@ export default function PartnerDetails() {
 
   if (!partner) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <Button variant="ghost" onClick={() => navigate('/partners')} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -199,14 +199,14 @@ export default function PartnerDetails() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate('/partners')}>
+    <div className="p-4 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <Button variant="ghost" className="self-start px-2" onClick={() => navigate('/partners')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar para Parceiros
         </Button>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isEditing ? (
             <>
               <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
