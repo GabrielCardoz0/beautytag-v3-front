@@ -109,7 +109,7 @@ export function FormModal({ open, onOpenChange, onSave, services }: FormModalPro
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Novo Formulário</DialogTitle>
         </DialogHeader>
