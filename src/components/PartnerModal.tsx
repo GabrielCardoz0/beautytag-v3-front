@@ -76,7 +76,7 @@ export function PartnerModal({ open, onOpenChange, onSave }: PartnerModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Cadastrar Novo Parceiro</DialogTitle>
         </DialogHeader>

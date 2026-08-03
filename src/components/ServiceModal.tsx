@@ -155,7 +155,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={showFinancialPanel ? "max-w-4xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[90vh] overflow-y-auto"}>
+      <DialogContent className={showFinancialPanel ? "w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto" : "w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto"}>
         <DialogHeader>
           <DialogTitle>{editingService ? 'Editar Serviço' : 'Cadastrar Novo Serviço'}</DialogTitle>
         </DialogHeader>
@@ -209,7 +209,7 @@ export function ServiceModal({ open, onOpenChange, onSave, onUpdate, editingServ
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Preço (R$) *</Label>
                   <Input
