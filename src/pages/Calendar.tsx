@@ -136,14 +136,14 @@ export default function Calendar() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-background">
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-3.5rem)] md:h-screen bg-background">
       {/* Desktop sidebar */}
       <div className="hidden md:flex w-80 flex-shrink-0 border-r border-border p-6 bg-card flex-col">
         {SidebarContent}
       </div>
 
       {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between gap-2 p-4 border-b border-border bg-card sticky top-0 z-10">
+      <div className="md:hidden flex items-center justify-between gap-2 p-4 border-b border-border bg-card sticky top-14 md:top-0 z-10">
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground capitalize truncate">
             {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
