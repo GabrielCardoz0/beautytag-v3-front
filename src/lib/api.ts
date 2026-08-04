@@ -106,7 +106,7 @@ export const partnersApi = {
   lookupClient: async (phone: string): Promise<string | null> => {
     try {
       const response = await api.get<{ client: { client_name: string | null } }>(
-        "/users/client",
+        "/appointments/client",
         { params: { phone } }
       );
       return response.data.client?.client_name ?? null;
